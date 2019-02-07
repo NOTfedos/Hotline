@@ -47,12 +47,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/game.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="464">
-              <caret line="114" column="55" selection-start-line="114" selection-start-column="55" selection-end-line="114" selection-end-column="55" />
+            <state relative-caret-position="592">
+              <caret line="127" lean-forward="true" selection-start-line="127" selection-end-line="127" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <marker date="1549571108058" expanded="true" signature="2491:2503" ph="..." />
-                <marker date="1549571108058" expanded="true" signature="2522:3837" ph="..." />
+                <marker date="1549571399465" expanded="true" signature="2491:2503" ph="..." />
+                <marker date="1549571399465" expanded="true" signature="2522:3836" ph="..." />
               </folding>
             </state>
           </provider>
@@ -188,12 +188,12 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/game.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="114" column="55" selection-start-line="114" selection-start-column="55" selection-end-line="114" selection-end-column="55" />
+        <state relative-caret-position="592">
+          <caret line="127" lean-forward="true" selection-start-line="127" selection-end-line="127" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <marker date="1549571108058" expanded="true" signature="2491:2503" ph="..." />
-            <marker date="1549571108058" expanded="true" signature="2522:3837" ph="..." />
+            <marker date="1549571399465" expanded="true" signature="2491:2503" ph="..." />
+            <marker date="1549571399465" expanded="true" signature="2522:3836" ph="..." />
           </folding>
         </state>
       </provider>

@@ -127,7 +127,6 @@ def start_screen():
         pygame.display.flip()
 
 
-
 def terminate():
     pygame.quit()
     sys.exit()
