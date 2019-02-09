@@ -476,6 +476,10 @@ def game_over_screen():
         pygame.display.flip()
 
 
+def options_screen():
+    pass
+
+
 def reset_sprites(*args):
     for el in args:
         el.kill()
@@ -487,8 +491,8 @@ def terminate():
 
 
 running = True
-lock_fps = False
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+lock_fps = True
+screen = pygame.display.set_mode((1280, 720))
 pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
 
