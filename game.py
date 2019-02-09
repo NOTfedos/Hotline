@@ -35,6 +35,7 @@ class Game_mode_arena:
 
 
 
+
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, image_name, x, y, func):
         super().__init__(group)
@@ -67,15 +68,14 @@ class Button(pygame.sprite.Sprite):
 
 
 class Arrow(pygame.sprite.Sprite):
-    def __init__(self, group):
+    def __init__(self, group, image_name):
         super().__init__(group)
         self.add(arrow_sprite)
-        self.image = load_image("arrow.png")
+        self.image = load_image(image_name)
         self.rect = self.image.get_rect()
 
     def update(self, *args):
-        btn = pygame.sprite.spritecollideany(self, button_sprite)
-        btn.func()
+        pass
 
 
 class Player(pygame.sprite.Sprite):
@@ -114,12 +114,12 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self):
         if self.hp <= 0:
-            if self.get_animation():
+            if self.get_animation_died():
                 self.kill()
 
         enemy_action(self, player)
 
-    def get_animation(self):
+    def get_animation_died(self):
         self.counter += 1
         if self.counter > 60:
             return True
@@ -132,19 +132,19 @@ def label_func():
 
 def start_screen():
 
-    screen.blit(pygame.transform.scale(menu_background,
-                                       (screen.get_width(),
-                                        screen.get_height())), 0, 0)
+    loc_pressed = False
 
-    pressed = False
-
-    arrow = Arrow(menu_sprite)
+    arrow = Arrow(menu_sprite, "menu_arrow.png")
     button_new_game = Button(menu_sprite, "new_game.png",
-                             screen.get_width() // 2, round(screen.get_height() * 0.8), restart_game)
+                             screen.get_width() // 2,
+                             round(screen.get_height() * 0.8),
+                             setup_game_screen)
     button_options = Button(menu_sprite, "options.png",
-                            screen.get_width() // 2, round(screen.get_height() * 0.85), options_screen)
+                            screen.get_width() // 2,
+                            round(screen.get_height() * 0.85), options_screen)
     button_quit = Button(menu_sprite, "quit.png",
-                         screen.get_width() // 2, round(screen.get_height() * 0.9), ready_quit)
+                         screen.get_width() // 2, round(screen.get_height() * 0.9),
+                         ready_quit_screen)
     lbl_start = Button(menu_sprite, "start.png", 0, 0, label_func)
     lbl_start.rect.x = (screen.get_width() - lbl_start.rect.w) // 2
     lbl_start.rect.y = round(screen.get_height() * 0.3)
@@ -154,21 +154,54 @@ def start_screen():
             if loc_event.type == pygame.QUIT:
                 terminate()
             if loc_event.type == pygame.MOUSEBUTTONDOWN:
-                pressed = True
+                loc_pressed = True
             else:
-                pressed = False
+                loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
                 arrow.rect.x = event.pos[0]
                 arrow.rect.y = event.pos[1]
+            if loc_event.type == pygame.KEYDOWN:
+                if loc_event.key == pygame.K_ESCAPE:
+                    ready_quit_screen()
+
+        screen.blit(pygame.transform.scale(menu_background,
+                                           (screen.get_width(),
+                                            screen.get_height())), 0, 0)
 
         if button_new_game.to_return:
+            button_new_game.kill()
+            button_options.kill()
+            button_quit.kill()
+            arrow.kill()
+            lbl_start.kill()
             return
         if button_quit.to_return:
+            button_new_game.kill()
+            button_options.kill()
+            button_quit.kill()
+            arrow.kill()
+            lbl_start.kill()
             return
 
-        menu_sprite.update(pressed)
+        menu_sprite.update(loc_pressed)
         menu_sprite.draw(screen)
         pygame.display.flip()
+
+def setup_game_screen():
+
+    loc_pressed = False
+
+    global current_game_mode
+
+    arrow = Arrow(menu_sprite, "menu_arrow.png")
+    button_options = Button(menu_sprite, "options.png",
+                            screen.get_width() // 2,
+                            round(screen.get_height() * 0.85),
+                            options_screen)
+    button_back = Button(menu_sprite, "back.png",
+                         round(screen.get_width() * 1.5),
+                         round(screen.get_height() * 0.9),
+                         start_screen)
 
 
 def terminate():
@@ -185,16 +218,21 @@ FPS = 60
 
 # GAME_MODES = {'ARENA': arena_action, 'LEVEL': level_action}
 
-start_screen()
-
-setup_game_screen()
-
 game_sprite = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
 player_sprite = pygame.sprite.Group()
 button_sprite = pygame.sprite.Group()
 arrow_sprite = pygame.sprite.Group()
 menu_sprite = pygame.sprite.Group()
+
+
+game_arrow = Arrow(game_sprite, "game_arrow.png")
+
+start_screen()
+reset_menu()
+
+current_game_mode = None
+setup_game_screen()
 
 menu_background = load_image("menu_background.png")
 background = load_image("background_game.png")
@@ -205,14 +243,25 @@ while running:
             terminate()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                menu_screen()
+                menu_screen()# open menu
+                reset_menu()# сбрасываем спрайты меню
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            current_game_mode.is_pushed(event.pos)
+        if event.type == pygame.MOUSEMOTION:
+            game_arrow.rect.x = event.pos[0]
+            game_arrow.rect.y = event.pos[1]
+
     screen.blit(pygame.transform.scale(background,
                                        (screen.get_width(),
                                         screen.get_height())), (0, 0))
+
     current_game_mode.next()
+
     game_sprite.update()
     game_sprite.draw(screen)
+
     pygame.display.flip()
+    
     if lock_fps:
         clock.tick(fps)
 
