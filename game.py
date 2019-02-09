@@ -114,9 +114,11 @@ def enemy_action(enemy, pl):
     else:
         enemy.y += round(enemy.max_velocity / (1 + abs(dx / dy)) ** 0.5)
 
+    # TODO : shooting
+
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group):
+    def __init__(self, group, x, y):
         super().__init__(group)
         self.add(enemy_sprite)
         self.image = load_image("enemy.png")
@@ -125,7 +127,9 @@ class Enemy(pygame.sprite.Sprite):
         self.damage = 10
         self.counter = 0
         self.shoot = 0
-        self.max_velocity
+        self.max_velocity = 50
+        self.x = x
+        self.y = y
 
     def update(self):
         self.shoot += 1
