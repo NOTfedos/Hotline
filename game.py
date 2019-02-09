@@ -18,19 +18,52 @@ def load_image(name, colorkey=None):
     return image
 
 
+class Game_mode_arena:
+
+    PLAYER_FULL_HP = [200, 150, 100, 50]
+    PLAYER_DAMAGE = [100, 75, 75, 50]
+    MAX_ENEMY_COUNT = [10, 15, 20, 30]
+
+    def __init__(self, difficulty):
+        self.difficulty = difficulty
+        self.player = Player(game_sprite, self.PLAYER_FULL_HP[difficulty], self.PLAYER_DAMAGE[difficulty])
+        self.enemy_list = []
+        self.spawn_enemies()
+
+    def spawn_enemies(self):
+        for i in range(self.MAX_ENEMY_COUNT // 2):
+
+
+
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, image_name, x, y, func):
         super().__init__(group)
         self.add(button_sprite)
+        self.image_name = image_name
         self.image = load_image(image_name)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.func = func
+        self.focused = False
+        self.to_return = False
 
     def update(self, *args):
         if pygame.sprite.spritecollideany(self, arrow_sprite):
-            self.image = load_image(self.image_name + "_focused")
+            self.focused = True
+        else:
+            self.focused = False
+
+        if self.focused and not(self.image_name.endswith("_focused")):
+            self.image_name = self.image_name + "_focused"
+            self.image = load_image(self.image_name)
+
+        if not self.focused and self.image_name.endswith("_focused"):
+            self.image_name = self.image_name[:-8]
+            self.image = load_image(self.image_name)
+
+        if self.focused and (True in args):
+            self.to_return = self.func()
 
 
 class Arrow(pygame.sprite.Sprite):
@@ -46,13 +79,15 @@ class Arrow(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group):
+    def __init__(self, group, full_hp, damage):
         super().__init__(group)
         self.add(player_sprite)
         self.image = load_image("player.png")
         self.rect = self.image.get_rect()
-        self.hp = 100
-        self.damage = 50
+        self.x = screen.get_width() // 2
+        self.y = screen.get_height() // 2
+        self.hp = full_hp
+        self.damage = damage
 
     def update(self):
         if self.hp <= 0:
@@ -82,7 +117,7 @@ class Enemy(pygame.sprite.Sprite):
             if self.get_animation():
                 self.kill()
 
-        action(self, player)
+        enemy_action(self, player)
 
     def get_animation(self):
         self.counter += 1
@@ -115,15 +150,24 @@ def start_screen():
     lbl_start.rect.y = round(screen.get_height() * 0.3)
 
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for loc_event in pygame.event.get():
+            if loc_event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if loc_event.type == pygame.MOUSEBUTTONDOWN:
                 pressed = True
-            if event.type == pygame.MOUSEMOTION:
+            else:
+                pressed = False
+            if loc_event.type == pygame.MOUSEMOTION:
                 arrow.rect.x = event.pos[0]
                 arrow.rect.y = event.pos[1]
+
+        if button_new_game.to_return:
+            return
+        if button_quit.to_return:
+            return
+
         menu_sprite.update(pressed)
+        menu_sprite.draw(screen)
         pygame.display.flip()
 
 
@@ -139,9 +183,11 @@ clock = pygame.time.Clock()
 
 FPS = 60
 
-GAME_MODES = {'ARENA': arena_action, 'LEVEL': level_action}
+# GAME_MODES = {'ARENA': arena_action, 'LEVEL': level_action}
 
 start_screen()
+
+setup_game_screen()
 
 game_sprite = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
@@ -161,12 +207,11 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 menu_screen()
     screen.blit(pygame.transform.scale(background,
-                                            (screen.get_width(),
-                                             screen.get_height())), (0, 0))
-
-    game_sprite.draw(screen)
-    GAME_MODES[CURRENT_GAME_MODE]()
+                                       (screen.get_width(),
+                                        screen.get_height())), (0, 0))
+    current_game_mode.next()
     game_sprite.update()
+    game_sprite.draw(screen)
     pygame.display.flip()
     if lock_fps:
         clock.tick(fps)
