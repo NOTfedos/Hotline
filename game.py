@@ -200,7 +200,7 @@ def setup_game_screen():
 
     loc_pressed = False
 
-    global current_game_mode, menu_background, screen
+    global menu_background, screen
 
     menu_sprite = pygame.sprite.Group()
     menu_arrow_sprite = pygame.sprite.Group()
@@ -342,6 +342,9 @@ def ready_quit_screen():
 
         pygame.display.flip()
 
+
+def menu_screen():
+    
 
 def reset_sprites(*args):
     for el in args:
