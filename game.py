@@ -141,7 +141,7 @@ def start_screen():
     button_new_game = Button(menu_sprite, "new_game.png",
                              screen.get_width() // 2,
                              round(screen.get_height() * 0.8),
-                             setup_game_screen)
+                             label_func)
     button_options = Button(menu_sprite, "options.png",
                             screen.get_width() // 2,
                             round(screen.get_height() * 0.85), options_screen)
@@ -344,7 +344,76 @@ def ready_quit_screen():
 
 
 def menu_screen():
-    
+
+    loc_pressed = True
+
+    global screen, menu_background
+
+    menu_sprite = pygame.sprite.Group()
+    menu_arrow_sprite = pygame.sprite.Group()
+
+    arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
+    button_quit = Button(menu_sprite, "quit.png",
+                         screen.get_width() // 2,
+                         round(screen.get_height() * 0.9),
+                         ready_quit_screen)
+    button_back = Button(menu_sprite, "back.png",
+                         round(screen.get_width() * 2 / 3),
+                         round(screen.get_height() * 0.9),
+                         label_func)
+    button_options = Button(menu_sprite, "options.png",
+                            screen.get_width() // 2,
+                            round(screen.get_height() * 0.85),
+                            options_screen)
+    button_new_game = Button(menu_sprite, "new_game.png",
+                             screen.get_width() // 2,
+                             round(screen.get_height() * 0.8),
+                             setup_game_screen)
+    lbl_pause = Button(menu_sprite, "pause.png",
+                       screen.get_width() // 2,
+                       round(screen.get_height() * 0.3),
+                       label_func)
+
+    while True:
+        for loc_event in pygame.event.get():
+            if loc_event.type == pygame.MOUSEBUTTONDOWN:
+                loc_pressed = True
+            else:
+                loc_pressed = False
+            if loc_event.type == pygame.MOUSEMOTION:
+                arrow.rect.x = event.pos[0]
+                arrow.rect.y = event.pos[1]
+            if loc_event.type == pygame.KEYDOWN:
+                if loc_event.key == pygame.K_ESCAPE:
+                    reset_sprites(arrow,
+                                  lbl_pause,
+                                  button_quit,
+                                  button_back,
+                                  button_options,
+                                  button_new_game)
+                    return
+
+        screen.blit(pygame.transform.scale(menu_background,
+                                           (screen.get_width(),
+                                            screen.get_height())), 0, 0)
+
+        if button_back.to_return:
+            reset_sprites(arrow,
+                          lbl_pause,
+                          button_quit,
+                          button_back,
+                          button_options,
+                          button_new_game)
+            return
+
+        menu_sprite.update(loc_pressed)
+        menu_sprite.draw(screen)
+
+        menu_arrow_sprite.update()
+        menu_arrow_sprite.draw(screen)
+
+        pygame.display.flip()
+
 
 def reset_sprites(*args):
     for el in args:
@@ -376,7 +445,7 @@ game_arrow_sprite = pygame.sprite.Group()
 game_arrow = Arrow(game_arrow_sprite, "game_arrow.png")
 
 start_screen()
-reset_menu()
+setup_game_screen()
 
 current_game_mode = None
 setup_game_screen()
