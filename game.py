@@ -18,7 +18,7 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Game_mode_arena:
+class GameModeArena:
 
     PLAYER_FULL_HP = [200, 150, 100, 50]
     PLAYER_DAMAGE = [100, 75, 75, 50]
@@ -100,6 +100,21 @@ class Player(pygame.sprite.Sprite):
                 self.hp = 0
 
 
+def enemy_action(enemy, pl):
+    dx = pl.x - enemy.x
+    dy = pl.y - enemy.y
+
+    if dx > 0:
+        enemy.x += round(enemy.max_velocity / (1 + abs(dy / dx)) ** 0.5)
+    else:
+        enemy.x -= round(enemy.max_velocity / (1 + abs(dy / dx)) ** 0.5)
+
+    if dy > 0:
+        enemy.y += round(enemy.max_velocity / (1 + abs(dx / dy)) ** 0.5)
+    else:
+        enemy.y += round(enemy.max_velocity / (1 + abs(dx / dy)) ** 0.5)
+
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -109,13 +124,16 @@ class Enemy(pygame.sprite.Sprite):
         self.hp = 100
         self.damage = 10
         self.counter = 0
+        self.shoot = 0
+        self.max_velocity
 
     def update(self):
+        self.shoot += 1
         if self.hp <= 0:
             if self.get_animation_died():
                 self.kill()
 
-        enemy_action(self, player)
+        enemy_action(self, current_game_mode.player)
 
     def get_animation_died(self):
         self.counter += 1
@@ -201,10 +219,12 @@ def setup_game_screen():
 
     loc_pressed = False
 
-    global menu_background, screen
+    global menu_background, screen, current_game_mode
 
     menu_sprite = pygame.sprite.Group()
     menu_arrow_sprite = pygame.sprite.Group()
+
+    current_game_mode = GameModeArena()
 
     arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
     button_options = Button(menu_sprite, "options.png",
@@ -510,9 +530,9 @@ game_arrow_sprite = pygame.sprite.Group()
 
 game_arrow = Arrow(game_arrow_sprite, "game_arrow.png")
 
-start_screen()
-
 current_game_mode = None
+
+start_screen()
 
 menu_background = load_image("menu_background.png")
 background = load_image("background_game.png")
@@ -545,6 +565,6 @@ while running:
     pygame.display.flip()
 
     if lock_fps:
-        clock.tick(fps)
+        clock.tick(FPS)
 
 terminate()
