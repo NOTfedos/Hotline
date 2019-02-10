@@ -128,8 +128,8 @@ class Button(pygame.sprite.Sprite):
                 self.image_name = self.image_name[:-12] + '.png'
                 self.image = load_image(self.image_name)
 
-            if self.focused and (True in args):
-                self.to_return = self.func(self)
+        if self.focused and (True in args):
+            self.to_return = self.func(self)
 
 
 class Arrow(pygame.sprite.Sprite):
@@ -159,7 +159,7 @@ class Player(pygame.sprite.Sprite):
             game_over_screen()
             return
         col_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
-        for enemy in col_dict[self]:
+        for enemy in col_dict:
             if self.hp >= enemy.hp:
                 self.hp -= enemy.hp
                 enemy.hp = 0
@@ -189,9 +189,9 @@ def enemy_action(enemy, pl, gm):
     dy = pl.y - enemy.y
     x = round(enemy.x + dx / abs(dx) * (enemy.rect.w / 2 + 10))
     y = round(enemy.y + dy / abs(dy) * (enemy.rect.h / 2 + 10))
-    gm.missile_list.append(Missile(game_sprite, x, y,
-                                   gm.MISSILE_MAX_VELO[gm.difficulty],
-                                   dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
+    # gm.missile_list.append(Missile(game_sprite, x, y,
+                                   # gm.MISSILE_MAX_VELO[gm.difficulty],
+                                   # dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -266,7 +266,7 @@ class Missile(pygame.sprite.Sprite):
 
         target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
 
-        for target in target_dict[self]:
+        for target in target_dict:
             target.hp -= self.damage
             self.destruct = True
 
@@ -364,11 +364,11 @@ def change_gm():
 
 def change_df(btn):
     if current_game_mode.difficulty == 3:
-        current_game_mode.difficulty == 0
+        current_game_mode.difficulty = 0
     else:
         current_game_mode.difficulty += 1
 
-    btn.image = load_image("difficulty_" + current_game_mode.difficulty + ".png")
+    btn.image = load_image("difficulty_" + str(current_game_mode.difficulty) + ".png")
 
 
 def setup_game_screen(*args):
@@ -408,7 +408,7 @@ def setup_game_screen(*args):
                          ready_quit_screen)
 
     button_next = Button(menu_sprite, "next.png",
-                         round(screen.get_width() * 1.5),
+                         round(screen.get_width() * 2 / 3),
                          round(screen.get_height() * 0.8),
                          label_func)
 
@@ -449,6 +449,7 @@ def setup_game_screen(*args):
             return False
 
         menu_sprite.update(loc_pressed, arrow)
+        loc_pressed = False
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -586,6 +587,7 @@ def menu_screen(*args):
             return
 
         menu_sprite.update(loc_pressed, arrow)
+        loc_pressed = False
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -646,6 +648,7 @@ def game_over_screen(*args):
                 return
 
         menu_sprite.update(loc_pressed, arrow)
+        loc_pressed = False
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
