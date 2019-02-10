@@ -105,7 +105,7 @@ class Button(pygame.sprite.Sprite):
         super().__init__(group)
         self.add(button_sprite)
         self.image_name = image_name
-        self.image = load_image(image_name)
+        self.image = load_image(image_name, -1)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -321,15 +321,15 @@ def start_screen():
             else:
                 loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
-                arrow.rect.x = event.pos[0]
-                arrow.rect.y = event.pos[1]
+                arrow.rect.x = loc_event.pos[0]
+                arrow.rect.y = loc_event.pos[1]
             if loc_event.type == pygame.KEYDOWN:
                 if loc_event.key == pygame.K_ESCAPE:
                     ready_quit_screen()
 
         screen.blit(pygame.transform.scale(menu_background,
                                            (screen.get_width(),
-                                            screen.get_height())), 0, 0)
+                                            screen.get_height())), (0, 0))
 
         if button_new_game.to_return:
             reset_sprites(button_new_game,
@@ -419,15 +419,15 @@ def setup_game_screen():
             else:
                 loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
-                arrow.rect.x = event.pos[0]
-                arrow.rect.y = event.pos[1]
+                arrow.rect.x = loc_event.pos[0]
+                arrow.rect.y = loc_event.pos[1]
             if loc_event.type == pygame.KEYDOWN:
                 if loc_event.key == pygame.K_ESCAPE:
                     ready_quit_screen()
 
         screen.blit(pygame.transform.scale(menu_background,
                                            (screen.get_width(),
-                                            screen.get_height())), 0, 0)
+                                            screen.get_height())), (0, 0))
 
         if button_back.to_return:
             reset_sprites(arrow,
@@ -488,8 +488,8 @@ def ready_quit_screen():
             else:
                 loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
-                arrow.rect.x = event.pos[0]
-                arrow.rect.y = event.pos[1]
+                arrow.rect.x = loc_event.pos[0]
+                arrow.rect.y = loc_event.pos[1]
             if loc_event.type == pygame.KEYDOWN:
                 if loc_event.key == pygame.K_ESCAPE:
                     reset_sprites(arrow,
@@ -500,7 +500,7 @@ def ready_quit_screen():
 
         screen.blit(pygame.transform.scale(menu_background,
                                            (screen.get_width(),
-                                            screen.get_height())), 0, 0)
+                                            screen.get_height())), (0, 0))
 
         if button_no.to_return:
             reset_sprites(arrow,
@@ -556,8 +556,8 @@ def menu_screen():
             else:
                 loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
-                arrow.rect.x = event.pos[0]
-                arrow.rect.y = event.pos[1]
+                arrow.rect.x = loc_event.pos[0]
+                arrow.rect.y = loc_event.pos[1]
             if loc_event.type == pygame.KEYDOWN:
                 if loc_event.key == pygame.K_ESCAPE:
                     reset_sprites(arrow,
@@ -570,7 +570,7 @@ def menu_screen():
 
         screen.blit(pygame.transform.scale(menu_background,
                                            (screen.get_width(),
-                                            screen.get_height())), 0, 0)
+                                            screen.get_height())), (0, 0))
 
         if button_back.to_return:
             reset_sprites(arrow,
@@ -619,8 +619,8 @@ def game_over_screen():
             else:
                 loc_pressed = False
             if loc_event.type == pygame.MOUSEMOTION:
-                arrow.rect.x = event.pos[0]
-                arrow.rect.y = event.pos[1]
+                arrow.rect.x = loc_event.pos[0]
+                arrow.rect.y = loc_event.pos[1]
             if loc_event.type == pygame.KEYDOWN:
                 if loc_event.key == pygame.K_ESCAPE:
                     reset_sprites(arrow,
@@ -631,7 +631,7 @@ def game_over_screen():
 
         screen.blit(pygame.transform.scale(menu_background,
                                            (screen.get_width(),
-                                            screen.get_height())), 0, 0)
+                                            screen.get_height())), (0, 0))
 
         if button_new_game.to_return:
             reset_sprites(button_new_game,
@@ -684,12 +684,12 @@ game_arrow_sprite = pygame.sprite.Group()
 
 
 game_arrow = Arrow(game_arrow_sprite, "game_arrow.png")
+menu_background = load_image("menu_background.png")
 
 current_game_mode = None
 
 start_screen()
 
-menu_background = load_image("menu_background.png")
 background = load_image("background_game.png")
 
 while running:
