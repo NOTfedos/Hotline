@@ -1,6 +1,7 @@
 import sys
 import pygame
 import os
+import random
 
 
 def load_image(name, colorkey=None):
@@ -23,6 +24,7 @@ class GameModeArena:
     PLAYER_FULL_HP = [200, 150, 100, 50]
     PLAYER_DAMAGE = [100, 75, 75, 50]
     MAX_ENEMY_COUNT = [10, 15, 20, 30]
+    ENEMY_FULL_HP = [150, 150, 175, 200]
 
     def __init__(self, difficulty):
         self.difficulty = difficulty
@@ -31,7 +33,11 @@ class GameModeArena:
         self.spawn_enemies()
 
     def spawn_enemies(self):
-        pass
+        for i in range(self.MAX_ENEMY_COUNT[self.difficulty]):
+            self.enemy_list.append(Enemy(game_sprite,
+                                         random.choice(list(range(200)) + list(range(1000, 1200))),
+                                         random.choice(list(range(200)) + list(range(500, 700)))))
+            self.enemy_list[i].hp = self.ENEMY_FULL_HP[self.difficulty]
 
 
 class Button(pygame.sprite.Sprite):
@@ -105,14 +111,14 @@ def enemy_action(enemy, pl):
     dy = pl.y - enemy.y
 
     if dx > 0:
-        enemy.x += round(enemy.max_velocity / (1 + abs(dy / dx)) ** 0.5)
+        enemy.x += round(enemy.max_velocity / FPS / (1 + abs(dy / dx)) ** 0.5)
     else:
-        enemy.x -= round(enemy.max_velocity / (1 + abs(dy / dx)) ** 0.5)
+        enemy.x -= round(enemy.max_velocity / FPS / (1 + abs(dy / dx)) ** 0.5)
 
     if dy > 0:
-        enemy.y += round(enemy.max_velocity / (1 + abs(dx / dy)) ** 0.5)
+        enemy.y += round(enemy.max_velocity / FPS / (1 + abs(dx / dy)) ** 0.5)
     else:
-        enemy.y += round(enemy.max_velocity / (1 + abs(dx / dy)) ** 0.5)
+        enemy.y += round(enemy.max_velocity / FPS / (1 + abs(dx / dy)) ** 0.5)
 
     # TODO : shooting
 
@@ -144,6 +150,50 @@ class Enemy(pygame.sprite.Sprite):
         if self.counter > 60:
             return True
         return False
+
+
+class Missile(pygame.sprite.Sprite):
+
+    global FPS
+
+    def __init__(self, group, x, y, max_velo, dx, dy, damage):
+        super().__init__(group)
+        self.add(missile_sprite)
+        self.image = load_image("missile.png")
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.max_velocity = max_velo
+        self.dx = dx
+        self.dy = dy
+        self.damage = damage
+        self.destruct = False
+
+    def update(self, *args):
+        if self.dx > 0:
+            self.rect.x += round(self.max_velocity / FPS / (1 + abs(self.dy / self.dx)) ** 0.5)
+        else:
+            self.rect.x -= round(self.max_velocity / FPS / (1 + abs(self.dy / self.dx)) ** 0.5)
+
+        if self.dy > 0:
+            self.rect.y += round(self.max_velocity / FPS / (1 + abs(self.dx / self.dy)) ** 0.5)
+        else:
+            self.rect.y += round(self.max_velocity / FPS / (1 + abs(self.dx / self.dy)) ** 0.5)
+
+        target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
+
+        for target in target_dict[self]:
+            target.hp -= self.damage
+            self.destruct = True
+
+        target_player = pygame.sprite.spritecollideany(self, player_sprite)
+
+        if target_player is not None:
+            target_player.hp -= self.damage
+            self.destruct = True
+
+        if self.destruct:
+            self.kill()
 
 
 def label_func():
@@ -527,6 +577,7 @@ FPS = 60
 game_sprite = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
 player_sprite = pygame.sprite.Group()
+missile_sprite = pygame.sprite.Group()
 button_sprite = pygame.sprite.Group()
 arrow_sprite = pygame.sprite.Group()
 game_arrow_sprite = pygame.sprite.Group()
