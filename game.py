@@ -33,7 +33,7 @@ class GameModeArena:
         self.difficulty = difficulty
         self.player = Player(game_sprite, self.PLAYER_FULL_HP[difficulty], self.PLAYER_DAMAGE[difficulty])
         self.enemy_list = []
-        self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
+        # self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
         self.missile_list = []
 
     def spawn_enemies(self, count):
@@ -79,12 +79,16 @@ class GameModeArena:
                 self.spawn_enemies(1)
 
         for enemy in self.enemy_list:
-            rotate(enemy, (self.player.x, self.player.y))
+            enemy.image, enemy.rect = rot_center(enemy.image, enemy.rect,
+                                                 get_angle(enemy,
+                                                           (self.player.x, self.player.y)))
 
-        rotate(self.player, (game_arrow.rect.x, game_arrow.rect.y))
+        self.player.image, self.player.rect = rot_center(load_image('player.png'),
+                                                         self.player.rect,
+                                                         get_angle(self.player, (game_arrow.rect.x, game_arrow.rect.y)))
 
 
-def rotate(obj, pos):
+def get_angle(obj, pos):
     dx = pos[0] - obj.x
     dy = pos[1] - obj.y
 
@@ -95,9 +99,18 @@ def rotate(obj, pos):
     if dy > 0:
         angle += math.pi
 
-    obj.image = pygame.transform.rotate(obj.image, math.degrees(angle))
-    obj.rect = obj.image.get_rect()
-    obj.set_coords()
+    return math.degrees(angle)
+
+    # obj.image = pygame.transform.rotate(obj.image, math.degrees(math.atan(dy / dx)))
+    # obj.rect = obj.image.get_rect()
+    # obj.set_coords()
+
+
+def rot_center(image, rect, angle):
+    """rotate an image while keeping its center"""
+    rot_image = pygame.transform.rotate(image, angle)
+    rot_rect = rot_image.get_rect(center=rect.center)
+    return rot_image, rot_rect
 
 
 class Button(pygame.sprite.Sprite):
@@ -151,6 +164,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.x = screen.get_width() // 2
         self.y = screen.get_height() // 2
+        self.set_coords()
         self.hp = full_hp
         self.damage = damage
 
@@ -158,13 +172,13 @@ class Player(pygame.sprite.Sprite):
         if self.hp <= 0:
             game_over_screen()
             return
-        col_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
-        for enemy in col_dict:
-            if self.hp >= enemy.hp:
-                self.hp -= enemy.hp
-                enemy.hp = 0
-            else:
-                self.hp = 0
+        #col_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
+        #for enemy in col_dict:
+            #if self.hp >= enemy.hp:
+                #self.hp -= enemy.hp
+                #enemy.hp = 0
+            #else:
+                #self.hp = 0
 
     def set_coords(self):
         self.rect.x = self.x - self.rect.w // 2
@@ -204,7 +218,7 @@ class Enemy(pygame.sprite.Sprite):
         self.damage = 10
         self.counter = 0
         self.shoot = 0
-        self.max_velocity = 50
+        self.max_velocity = 10
         self.x = x
         self.y = y
         self.to_destruct = False
@@ -251,7 +265,7 @@ class Missile(pygame.sprite.Sprite):
         self.dy = dy
         self.damage = damage
         self.destruct = False
-        rotate(self, (x + dx, y + dy))
+        self.image, self.rect = rot_center(self.image, get_angle(self, (x + dx, y + dy)))
 
     def update(self, *args):
         if self.dx > 0:
@@ -526,7 +540,6 @@ def ready_quit_screen(*args):
 def menu_screen(*args):
 
     loc_pressed = True
-
     global screen, menu_background
 
     menu_sprite = pygame.sprite.Group()
@@ -705,7 +718,7 @@ while running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            terminate()
+            ready_quit_screen()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 menu_screen()  # open menu
