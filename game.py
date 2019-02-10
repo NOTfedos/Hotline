@@ -101,7 +101,7 @@ def rotate(obj, pos):
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, group, image_name, x, y, func):
+    def __init__(self, group, image_name, x, y, func, label=False):
         super().__init__(group)
         self.add(button_sprite)
         self.image_name = image_name
@@ -112,23 +112,24 @@ class Button(pygame.sprite.Sprite):
         self.func = func
         self.focused = False
         self.to_return = False
+        self.label = label
 
     def update(self, *args):
         if pygame.sprite.spritecollideany(self, arrow_sprite):
             self.focused = True
         else:
             self.focused = False
+        if not self.label:
+            if self.focused and not(self.image_name.endswith("_focused.png")):
+                self.image_name = self.image_name[:-4] + "_focused.png"
+                self.image = load_image(self.image_name, -1)
 
-        if self.focused and not(self.image_name.endswith("_focused")):
-            self.image_name = self.image_name + "_focused"
-            self.image = load_image(self.image_name, -1)
+            if not self.focused and self.image_name.endswith("_focused.png"):
+                self.image_name = self.image_name[:-12] + '.png'
+                self.image = load_image(self.image_name)
 
-        if not self.focused and self.image_name.endswith("_focused"):
-            self.image_name = self.image_name[:-8]
-            self.image = load_image(self.image_name)
-
-        if self.focused and (True in args):
-            self.to_return = self.func(self)
+            if self.focused and (True in args):
+                self.to_return = self.func(self)
 
 
 class Arrow(pygame.sprite.Sprite):
@@ -283,11 +284,11 @@ class Missile(pygame.sprite.Sprite):
         self.rect.y = self.y
 
 
-def label_func():
+def label_func(*args):
     return True
 
 
-def start_screen():
+def start_screen(*args):
 
     loc_pressed = False
 
@@ -308,7 +309,7 @@ def start_screen():
                          screen.get_width() // 2,
                          round(screen.get_height() * 0.9),
                          ready_quit_screen)
-    lbl_start = Button(menu_sprite, "start.png", 0, 0, label_func)
+    lbl_start = Button(menu_sprite, "start.png", 0, 0, label_func, True)
     lbl_start.rect.x = (screen.get_width() - lbl_start.rect.w) // 2
     lbl_start.rect.y = round(screen.get_height() * 0.3)
 
@@ -369,7 +370,7 @@ def change_df(btn):
     btn.image = load_image("difficulty_" + current_game_mode.difficulty + ".png")
 
 
-def setup_game_screen():
+def setup_game_screen(*args):
 
     loc_pressed = False
 
@@ -455,7 +456,7 @@ def setup_game_screen():
         pygame.display.flip()
 
 
-def ready_quit_screen():
+def ready_quit_screen(*args):
 
     loc_pressed = False
 
@@ -469,7 +470,7 @@ def ready_quit_screen():
     lbl_ready = Button(menu_sprite, "ready_quit.png",
                        screen.get_width() // 2,
                        round(screen.get_height() * 0.3),
-                       label_func)
+                       label_func, True)
 
     button_yes = Button(menu_sprite, "yes.png",
                         round(screen.get_width() * 2 / 3),
@@ -518,7 +519,7 @@ def ready_quit_screen():
         pygame.display.flip()
 
 
-def menu_screen():
+def menu_screen(*args):
 
     loc_pressed = True
 
@@ -547,7 +548,7 @@ def menu_screen():
     lbl_pause = Button(menu_sprite, "pause.png",
                        screen.get_width() // 2,
                        round(screen.get_height() * 0.3),
-                       label_func)
+                       label_func, True)
 
     while True:
         for loc_event in pygame.event.get():
@@ -590,7 +591,7 @@ def menu_screen():
         pygame.display.flip()
 
 
-def game_over_screen():
+def game_over_screen(*args):
     loc_pressed = True
 
     global screen, menu_background
@@ -602,7 +603,7 @@ def game_over_screen():
     lbl_game_over = Button(menu_sprite, "pause.png",
                            screen.get_width() // 2,
                            round(screen.get_height() * 0.3),
-                           label_func)
+                           label_func, True)
     button_quit = Button(menu_sprite, "quit.png",
                          screen.get_width() // 2,
                          round(screen.get_height() * 0.9),
@@ -650,7 +651,7 @@ def game_over_screen():
         pygame.display.flip()
 
 
-def options_screen():
+def options_screen(*args):
     pass
 
 
@@ -659,7 +660,7 @@ def reset_sprites(*args):
         el.kill()
 
 
-def terminate():
+def terminate(*args):
     pygame.quit()
     sys.exit()
 
