@@ -115,7 +115,7 @@ class Button(pygame.sprite.Sprite):
         self.label = label
 
     def update(self, *args):
-        if pygame.sprite.spritecollideany(self, arrow_sprite):
+        if self.rect.collidepoint((args[1].rect.x, args[1].rect.y)):
             self.focused = True
         else:
             self.focused = False
@@ -300,17 +300,17 @@ def start_screen(*args):
     arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
     button_new_game = Button(menu_sprite, "new_game.png",
                              screen.get_width() // 2,
-                             round(screen.get_height() * 0.8),
+                             round(screen.get_height() * 0.7),
                              label_func)
     button_options = Button(menu_sprite, "options.png",
                             screen.get_width() // 2,
-                            round(screen.get_height() * 0.85), options_screen)
+                            round(screen.get_height() * 0.8), options_screen)
     button_quit = Button(menu_sprite, "quit.png",
                          screen.get_width() // 2,
                          round(screen.get_height() * 0.9),
                          ready_quit_screen)
     lbl_start = Button(menu_sprite, "start.png", 0, 0, label_func, True)
-    lbl_start.rect.x = (screen.get_width() - lbl_start.rect.w) // 2
+    lbl_start.rect.x = (screen.get_width() - 30) // 2
     lbl_start.rect.y = round(screen.get_height() * 0.3)
 
     while True:
@@ -348,7 +348,7 @@ def start_screen(*args):
                           # lbl_start)
             # return
 
-        menu_sprite.update(loc_pressed)
+        menu_sprite.update(loc_pressed, arrow)
         loc_pressed = False
         menu_sprite.draw(screen)
 
@@ -448,7 +448,7 @@ def setup_game_screen(*args):
                           button_game_mode)
             return False
 
-        menu_sprite.update(loc_pressed)
+        menu_sprite.update(loc_pressed, arrow)
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -511,7 +511,7 @@ def ready_quit_screen(*args):
                           button_no)
             return
 
-        menu_sprite.update(loc_pressed)
+        menu_sprite.update(loc_pressed, arrow)
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -583,7 +583,7 @@ def menu_screen(*args):
                           button_new_game)
             return
 
-        menu_sprite.update(loc_pressed)
+        menu_sprite.update(loc_pressed, arrow)
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -643,7 +643,7 @@ def game_over_screen(*args):
             if not (setup_game_screen()):
                 return
 
-        menu_sprite.update(loc_pressed)
+        menu_sprite.update(loc_pressed, arrow)
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
