@@ -79,7 +79,7 @@ class GameModeArena:
                 self.spawn_enemies(1)
 
         for enemy in self.enemy_list:
-            enemy.image, enemy.rect = rot_center(enemy.image, enemy.rect,
+            enemy.image, enemy.rect = rot_center(load_image('enemy.png'), enemy.rect,
                                                  get_angle(enemy,
                                                            (self.player.x, self.player.y)))
 
@@ -96,8 +96,13 @@ def get_angle(obj, pos):
 
     angle = math.asin(dx ** 2 / gip)
 
+    if dx < 0:
+        angle *= -1
+
     if dy > 0:
         angle += math.pi
+    else:
+        angle *= -1
 
     return math.degrees(angle)
 
@@ -265,7 +270,7 @@ class Missile(pygame.sprite.Sprite):
         self.dy = dy
         self.damage = damage
         self.destruct = False
-        self.image, self.rect = rot_center(self.image, get_angle(self, (x + dx, y + dy)))
+        self.image, self.rect = rot_center(self.image, self.rect,get_angle(self, (x + dx, y + dy)))
 
     def update(self, *args):
         if self.dx > 0:
