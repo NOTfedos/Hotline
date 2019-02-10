@@ -23,21 +23,65 @@ class GameModeArena:
 
     PLAYER_FULL_HP = [200, 150, 100, 50]
     PLAYER_DAMAGE = [100, 75, 75, 50]
+    PLAYER_VELOCITY = [70, 70, 70, 70]
     MAX_ENEMY_COUNT = [10, 15, 20, 30]
     ENEMY_FULL_HP = [150, 150, 175, 200]
+    MISSILE_MAX_VELO = [60, 80, 100, 130]
 
     def __init__(self, difficulty):
         self.difficulty = difficulty
         self.player = Player(game_sprite, self.PLAYER_FULL_HP[difficulty], self.PLAYER_DAMAGE[difficulty])
         self.enemy_list = []
-        self.spawn_enemies()
+        self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
+        self.missile_list = []
 
-    def spawn_enemies(self):
-        for i in range(self.MAX_ENEMY_COUNT[self.difficulty]):
+    def spawn_enemies(self, count):
+        for i in range(count):
             self.enemy_list.append(Enemy(game_sprite,
                                          random.choice(list(range(200)) + list(range(1000, 1200))),
-                                         random.choice(list(range(200)) + list(range(500, 700)))))
+                                         random.choice(list(range(200)) + list(range(500, 700))), self))
             self.enemy_list[i].hp = self.ENEMY_FULL_HP[self.difficulty]
+
+    def is_pushed(self, pos):
+        dx = pos[0] - self.player.x
+        dy = pos[1] - self.player.y
+        x = round(self.player.x + dx / abs(dx) * (self.player.rect.w / 2 + 10))
+        y = round(self.player.y + dy / abs(dy) * (self.player.rect.h / 2 + 10))
+        self.missile_list.append(Missile(game_sprite, x, y,
+                                         self.MISSILE_MAX_VELO[self.difficulty],
+                                         dx, dy, self.PLAYER_DAMAGE[self.difficulty]))
+
+    def move(self, dir):
+
+        if 'N' in dir:
+            for enemy in self.enemy_list:
+                enemy.rect.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+        if 'S' in dir:
+            for enemy in self.enemy_list:
+                enemy.rect.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
+        if 'W' in dir:
+            for enemy in self.enemy_list:
+                enemy.rect.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
+        if 'E' in dir:
+            for enemy in self.enemy_list:
+                enemy.rect.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+
+    def next(self):
+
+        for missile in self.missile_list:
+            if missile.destruct:
+                self.missile_list.remove(missile)
+
+        for enemy in self.enemy_list:
+            if enemy.to_destruct:
+                self.enemy_list.remove(enemy)
+                self.spawn_enemies(1)
+
+        # TODO: rotating enemies and player
+
+
+
+
 
 
 class Button(pygame.sprite.Sprite):
@@ -106,7 +150,7 @@ class Player(pygame.sprite.Sprite):
                 self.hp = 0
 
 
-def enemy_action(enemy, pl):
+def enemy_action(enemy, pl, gm):
     dx = pl.x - enemy.x
     dy = pl.y - enemy.y
 
@@ -120,11 +164,17 @@ def enemy_action(enemy, pl):
     else:
         enemy.y += round(enemy.max_velocity / FPS / (1 + abs(dx / dy)) ** 0.5)
 
-    # TODO : shooting
+    dx = pl.x - enemy.x
+    dy = pl.y - enemy.y
+    x = round(enemy.x + dx / abs(dx) * (enemy.rect.w / 2 + 10))
+    y = round(enemy.y + dy / abs(dy) * (enemy.rect.h / 2 + 10))
+    gm.missile_list.append(Missile(game_sprite, x, y,
+                                   gm.MISSILE_MAX_VELO[gm.difficulty],
+                                   dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, x, y):
+    def __init__(self, group, x, y, game_mode):
         super().__init__(group)
         self.add(enemy_sprite)
         self.image = load_image("enemy.png")
@@ -136,14 +186,17 @@ class Enemy(pygame.sprite.Sprite):
         self.max_velocity = 50
         self.x = x
         self.y = y
+        self.to_destruct = False
+        self.gm = game_mode
 
     def update(self):
         self.shoot += 1
         if self.hp <= 0:
             if self.get_animation_died():
+                self.to_destruct = True
                 self.kill()
 
-        enemy_action(self, current_game_mode.player)
+        enemy_action(self, current_game_mode.player, self.gm)
 
     def get_animation_died(self):
         self.counter += 1
