@@ -81,7 +81,7 @@ class GameModeArena:
         for enemy in self.enemy_list:
             rotate(enemy, (self.player.x, self.player.y))
 
-        rotate(self.player, (game_arrow.rect.x, game_arrow.y))
+        rotate(self.player, (game_arrow.rect.x, game_arrow.rect.y))
 
 
 def rotate(obj, pos):
@@ -121,7 +121,7 @@ class Button(pygame.sprite.Sprite):
 
         if self.focused and not(self.image_name.endswith("_focused")):
             self.image_name = self.image_name + "_focused"
-            self.image = load_image(self.image_name)
+            self.image = load_image(self.image_name, -1)
 
         if not self.focused and self.image_name.endswith("_focused"):
             self.image_name = self.image_name[:-8]
@@ -135,7 +135,7 @@ class Arrow(pygame.sprite.Sprite):
     def __init__(self, group, image_name):
         super().__init__(group)
         self.add(arrow_sprite)
-        self.image = load_image(image_name)
+        self.image = load_image(image_name, -1)
         self.rect = self.image.get_rect()
 
     def update(self, *args):
@@ -240,15 +240,17 @@ class Missile(pygame.sprite.Sprite):
     def __init__(self, group, x, y, max_velo, dx, dy, damage):
         super().__init__(group)
         self.add(missile_sprite)
-        self.image = load_image("missile.png")
+        self.image = load_image("missile.png", -1)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.x, self.y = x, y
         self.max_velocity = max_velo
         self.dx = dx
         self.dy = dy
         self.damage = damage
         self.destruct = False
+        rotate(self, (x + dx, y + dy))
 
     def update(self, *args):
         if self.dx > 0:
@@ -275,6 +277,10 @@ class Missile(pygame.sprite.Sprite):
 
         if self.destruct:
             self.kill()
+
+    def set_coords(self):
+        self.rect.x = self.x
+        self.rect.y = self.y
 
 
 def label_func():
@@ -360,7 +366,7 @@ def change_df(btn):
     else:
         current_game_mode.difficulty += 1
 
-    btn.image = load_image("difficulty " + current_game_mode.difficulty)
+    btn.image = load_image("difficulty_" + current_game_mode.difficulty + ".png")
 
 
 def setup_game_screen():
@@ -372,7 +378,7 @@ def setup_game_screen():
     menu_sprite = pygame.sprite.Group()
     menu_arrow_sprite = pygame.sprite.Group()
 
-    current_game_mode = GameModeArena()
+    current_game_mode = GameModeArena(1)
 
     arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
     button_options = Button(menu_sprite, "options.png",
