@@ -385,7 +385,7 @@ def setup_game_screen(*args):
     arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
     button_options = Button(menu_sprite, "options.png",
                             screen.get_width() // 2,
-                            round(screen.get_height() * 0.85),
+                            round(screen.get_height() * 0.8),
                             options_screen)
     button_back = Button(menu_sprite, "back.png",
                          round(screen.get_width() * 2 / 3),
@@ -409,7 +409,7 @@ def setup_game_screen(*args):
 
     button_next = Button(menu_sprite, "next.png",
                          round(screen.get_width() * 1.5),
-                         round(screen.get_height() * 0.85),
+                         round(screen.get_height() * 0.8),
                          label_func)
 
     while True:
@@ -475,12 +475,12 @@ def ready_quit_screen(*args):
 
     button_yes = Button(menu_sprite, "yes.png",
                         round(screen.get_width() * 2 / 3),
-                        round(screen.get_height() * 0.85),
+                        round(screen.get_height() * 0.8),
                         terminate)
 
     button_no = Button(menu_sprite, "no.png",
                        round(screen.get_width() / 3),
-                       round(screen.get_height() * 0.85),
+                       round(screen.get_height() * 0.8),
                        label_func)
 
     while True:
@@ -540,11 +540,11 @@ def menu_screen(*args):
                          label_func)
     button_options = Button(menu_sprite, "options.png",
                             screen.get_width() // 2,
-                            round(screen.get_height() * 0.85),
+                            round(screen.get_height() * 0.8),
                             options_screen)
     button_new_game = Button(menu_sprite, "new_game.png",
                              screen.get_width() // 2,
-                             round(screen.get_height() * 0.8),
+                             round(screen.get_height() * 0.7),
                              setup_game_screen)
     lbl_pause = Button(menu_sprite, "pause.png",
                        screen.get_width() // 2,
