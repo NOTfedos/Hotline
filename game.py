@@ -395,12 +395,12 @@ def setup_game_screen(*args):
     button_game_mode = Button(menu_sprite, "press_to_select_gm.png",
                               screen.get_width() // 3,
                               round(screen.get_height() * 0.7),
-                              change_gm)
+                              change_gm, True)
 
     button_difficulty = Button(menu_sprite, "press_to_select_df.png",
                                round(screen.get_width() * 2 / 3),
                                round(screen.get_height() * 0.7),
-                               change_df)
+                               change_df, True)
 
     button_quit = Button(menu_sprite, "quit.png",
                          screen.get_width() // 2,
@@ -472,6 +472,8 @@ def ready_quit_screen(*args):
                        screen.get_width() // 2,
                        round(screen.get_height() * 0.3),
                        label_func, True)
+
+    lbl_ready.rect.x -= lbl_ready.rect.w // 2 - 50
 
     button_yes = Button(menu_sprite, "yes.png",
                         round(screen.get_width() * 2 / 3),
