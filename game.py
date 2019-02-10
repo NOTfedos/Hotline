@@ -509,7 +509,6 @@ def ready_quit_screen(*args):
                           lbl_ready,
                           button_yes,
                           button_no)
-            print('return')
             return
 
         menu_sprite.update(loc_pressed)
