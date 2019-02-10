@@ -87,6 +87,11 @@ class GameModeArena:
                                                          self.player.rect,
                                                          get_angle(self.player, (game_arrow.rect.x, game_arrow.rect.y)))
 
+    def is_end(self):
+        if self.player.hp <= 0:
+            return True
+        return False
+
 
 def get_angle(obj, pos):
     dx = pos[0] - obj.x
@@ -174,9 +179,10 @@ class Player(pygame.sprite.Sprite):
         self.damage = damage
 
     def update(self):
-        if self.hp <= 0:
-            game_over_screen()
-            return
+        pass
+        # if self.hp <= 0:
+            # game_over_screen()
+            # return
         #col_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
         #for enemy in col_dict:
             #if self.hp >= enemy.hp:
@@ -295,6 +301,12 @@ class Missile(pygame.sprite.Sprite):
             target_player.hp -= self.damage
             self.destruct = True
 
+        if abs(self.x + self.dx - self.rect.x) > 1000:
+            self.destruct = True
+
+        if abs(self.y + self.dy - self.rect.y) > 1000:
+            self.destruct = True
+
         if self.destruct:
             self.kill()
 
@@ -320,7 +332,7 @@ def start_screen(*args):
     button_new_game = Button(menu_sprite, "new_game.png",
                              screen.get_width() // 2,
                              round(screen.get_height() * 0.7),
-                             label_func)
+                             setup_game_screen)
     button_options = Button(menu_sprite, "options.png",
                             screen.get_width() // 2,
                             round(screen.get_height() * 0.8), options_screen)
@@ -357,8 +369,7 @@ def start_screen(*args):
                           button_quit,
                           arrow,
                           lbl_start)
-            if not (setup_game_screen()):
-                return
+            return
         # if button_quit.to_return:
             # reset_sprites(button_new_game,
                           # button_options,
@@ -394,8 +405,9 @@ def setup_game_screen(*args):
 
     loc_pressed = False
 
-    global menu_background, screen, current_game_mode
+    global menu_background, screen, current_game_mode, game_sprite
 
+    game_sprite = pygame.sprite.Group()
     menu_sprite = pygame.sprite.Group()
     menu_arrow_sprite = pygame.sprite.Group()
 
@@ -409,7 +421,7 @@ def setup_game_screen(*args):
     button_back = Button(menu_sprite, "back.png",
                          round(screen.get_width() * 2 / 3),
                          round(screen.get_height() * 0.9),
-                         start_screen)
+                         label_func)
 
     button_game_mode = Button(menu_sprite, "press_to_select_gm.png",
                               screen.get_width() // 3,
@@ -457,7 +469,7 @@ def setup_game_screen(*args):
                           button_options,
                           button_difficulty,
                           button_game_mode)
-            return True
+            return False
         if button_next.to_return:
             reset_sprites(arrow,
                           button_back,
@@ -465,7 +477,7 @@ def setup_game_screen(*args):
                           button_options,
                           button_difficulty,
                           button_game_mode)
-            return False
+            return True
 
         menu_sprite.update(loc_pressed, arrow)
         loc_pressed = False
@@ -604,6 +616,15 @@ def menu_screen(*args):
                           button_new_game)
             return
 
+        if button_new_game.to_return:
+            reset_sprites(arrow,
+                          lbl_pause,
+                          button_quit,
+                          button_back,
+                          button_options,
+                          button_new_game)
+            return
+
         menu_sprite.update(loc_pressed, arrow)
         loc_pressed = False
         menu_sprite.draw(screen)
@@ -657,13 +678,12 @@ def game_over_screen(*args):
                                            (screen.get_width(),
                                             screen.get_height())), (0, 0))
 
-        if button_new_game.to_return:
+        if button_new_game.to_return:  # next
             reset_sprites(button_new_game,
                           button_quit,
                           arrow,
                           lbl_game_over)
-            if not (setup_game_screen()):
-                return
+            return
 
         menu_sprite.update(loc_pressed, arrow)
         loc_pressed = False
@@ -747,6 +767,11 @@ while running:
 
     current_game_mode.move(dirs)
     current_game_mode.next()
+
+    if current_game_mode.player.hp <= 0:
+        print('kek')
+        game_over_screen()
+        print('kek 2')
 
     game_sprite.update()
     game_sprite.draw(screen)
