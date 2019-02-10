@@ -340,15 +340,16 @@ def start_screen(*args):
                           lbl_start)
             if not (setup_game_screen()):
                 return
-        if button_quit.to_return:
-            reset_sprites(button_new_game,
-                          button_options,
-                          button_quit,
-                          arrow,
-                          lbl_start)
-            return
+        # if button_quit.to_return:
+            # reset_sprites(button_new_game,
+                          # button_options,
+                          # button_quit,
+                          # arrow,
+                          # lbl_start)
+            # return
 
         menu_sprite.update(loc_pressed)
+        loc_pressed = False
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -508,6 +509,7 @@ def ready_quit_screen(*args):
                           lbl_ready,
                           button_yes,
                           button_no)
+            print('return')
             return
 
         menu_sprite.update(loc_pressed)
