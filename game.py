@@ -37,11 +37,11 @@ class GameModeArena:
         self.missile_list = []
 
     def spawn_enemies(self, count):
-        for i in range(count):
+        for k in range(count):
             self.enemy_list.append(Enemy(game_sprite,
                                          random.choice(list(range(200)) + list(range(1000, 1200))),
                                          random.choice(list(range(200)) + list(range(500, 700))), self))
-            self.enemy_list[i].hp = self.ENEMY_FULL_HP[self.difficulty]
+            self.enemy_list[k].hp = self.ENEMY_FULL_HP[self.difficulty]
 
     def is_pushed(self, pos):
         dx = pos[0] - self.player.x
@@ -52,8 +52,8 @@ class GameModeArena:
 
         self.missile_list[-1].move()
 
-    def move(self, dir):
-        if 'N' in dir:
+    def move(self, direction):
+        if 'N' in direction:
             for enemy in self.enemy_list:
                 enemy.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             # for i in range(len(self.missile_list)):
@@ -61,17 +61,17 @@ class GameModeArena:
 
             for missile in self.missile_list:
                 missile.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
-        if 'S' in dir:
+        if 'S' in direction:
             for enemy in self.enemy_list:
                 enemy.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
                 missile.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
-        if 'W' in dir:
+        if 'W' in direction:
             for enemy in self.enemy_list:
                 enemy.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
                 missile.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
-        if 'E' in dir:
+        if 'E' in direction:
             for enemy in self.enemy_list:
                 enemy.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
@@ -199,16 +199,6 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         pass
-        # if self.hp <= 0:
-            # game_over_screen()
-            # return
-        #col_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
-        #for enemy in col_dict:
-            #if self.hp >= enemy.hp:
-                #self.hp -= enemy.hp
-                #enemy.hp = 0
-            #else:
-                #self.hp = 0
 
     def set_coords(self):
         self.rect.x = self.x - self.rect.w // 2
@@ -254,6 +244,8 @@ class Enemy(pygame.sprite.Sprite):
         self.to_destruct = False
         self.gm = game_mode
         self.set_coords()
+        self.sin = 1
+        self.cos = 0
 
     def update(self):
         self.shoot += 1
@@ -310,14 +302,6 @@ class Missile(pygame.sprite.Sprite):
         self.damage = damage
         self.destruct = False
         self.image, self.rect = rot_center(self.image, self.rect, get_angle(self, (x + dx, y + dy)))
-        # if dx > 0:
-            # self.x += 50
-        # else:
-            # self.x -= 50
-        # if dy > 0:
-            # self.y += 50
-        # else:
-            # self.y -= 50
         gip = (dx ** 2 + dy ** 2) ** 0.5
         self.cos = dx / gip
         self.sin = dy / gip
@@ -418,13 +402,6 @@ def start_screen(*args):
                           arrow,
                           lbl_start)
             return
-        # if button_quit.to_return:
-            # reset_sprites(button_new_game,
-                          # button_options,
-                          # button_quit,
-                          # arrow,
-                          # lbl_start)
-            # return
 
         menu_sprite.update(loc_pressed, arrow)
         loc_pressed = False
