@@ -89,7 +89,7 @@ class GameModeArena:
                 self.spawn_enemies(1)
 
         for enemy in self.enemy_list:
-            enemy.image, enemy.rect = rot_center(load_image('enemy.png'), enemy.rect,
+            enemy.image, enemy.rect = rot_center(load_image(enemy.name_image), enemy.rect,
                                                  get_angle(enemy, (self.player.x, self.player.y)))
 
         self.player.image, self.player.rect = rot_center(load_image('player.png'),
@@ -233,7 +233,8 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, group, x, y, game_mode):
         super().__init__(group)
         self.add(enemy_sprite)
-        self.image = load_image("enemy.png")
+        self.name_image = 'enemy.png'
+        self.image = load_image(self.name_image)
         self.rect = self.image.get_rect()
         self.hp = 100
         self.damage = 10
@@ -249,6 +250,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.shoot += 1
         if self.hp <= 0:
+            self.name_image = 'enemy_killed.png'
             if self.get_animation_died():
                 self.to_destruct = True
                 self.kill()
