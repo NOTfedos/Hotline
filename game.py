@@ -353,6 +353,10 @@ def label_func(*args):
 
 def start_screen(*args):
 
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+    pygame.mixer.music.play(-1, 0.0)
+
     loc_pressed = False
 
     global menu_background, screen
@@ -401,9 +405,13 @@ def start_screen(*args):
                           button_quit,
                           arrow,
                           lbl_start)
+            pygame.mixer.music.stop()
             return
 
         menu_sprite.update(loc_pressed, arrow)
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+            pygame.mixer.music.play(-1, 0.0)
         loc_pressed = False
         menu_sprite.draw(screen)
 
@@ -427,6 +435,10 @@ def change_df(btn):
 
 
 def setup_game_screen(*args):
+
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+    pygame.mixer.music.play(-1, 0.0)
 
     loc_pressed = False
 
@@ -494,6 +506,7 @@ def setup_game_screen(*args):
                           button_options,
                           button_difficulty,
                           button_game_mode)
+            pygame.mixer.music.stop()
             return False
         if button_next.to_return:
             reset_sprites(arrow,
@@ -502,9 +515,13 @@ def setup_game_screen(*args):
                           button_options,
                           button_difficulty,
                           button_game_mode)
+            pygame.mixer.music.stop()
             return True
 
         menu_sprite.update(loc_pressed, arrow)
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+            pygame.mixer.music.play(-1, 0.0)
         loc_pressed = False
         menu_sprite.draw(screen)
 
@@ -515,6 +532,10 @@ def setup_game_screen(*args):
 
 
 def ready_quit_screen(*args):
+
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+    pygame.mixer.music.play(-1, 0.0)
 
     loc_pressed = False
 
@@ -557,6 +578,7 @@ def ready_quit_screen(*args):
                                   lbl_ready,
                                   button_yes,
                                   button_no)
+                    pygame.mixer.music.stop()
                     return
 
         screen.blit(pygame.transform.scale(menu_background,
@@ -568,9 +590,13 @@ def ready_quit_screen(*args):
                           lbl_ready,
                           button_yes,
                           button_no)
+            pygame.mixer.music.stop()
             return
 
         menu_sprite.update(loc_pressed, arrow)
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+            pygame.mixer.music.play(-1, 0.0)
         menu_sprite.draw(screen)
 
         menu_arrow_sprite.update()
@@ -580,6 +606,10 @@ def ready_quit_screen(*args):
 
 
 def menu_screen(*args):
+
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+    pygame.mixer.music.play(-1, 0.0)
 
     loc_pressed = True
     global screen, menu_background
@@ -639,6 +669,7 @@ def menu_screen(*args):
                           button_back,
                           button_options,
                           button_new_game)
+            pygame.mixer.music.stop()
             return
 
         if button_new_game.to_return:
@@ -648,9 +679,13 @@ def menu_screen(*args):
                           button_back,
                           button_options,
                           button_new_game)
+            pygame.mixer.music.stop()
             return
 
         menu_sprite.update(loc_pressed, arrow)
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+            pygame.mixer.music.play(-1, 0.0)
         loc_pressed = False
         menu_sprite.draw(screen)
 
@@ -661,6 +696,10 @@ def menu_screen(*args):
 
 
 def game_over_screen(*args):
+
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+    pygame.mixer.music.play(-1, 0.0)
     loc_pressed = True
 
     global screen, menu_background
@@ -698,6 +737,7 @@ def game_over_screen(*args):
                                   lbl_game_over,
                                   button_quit,
                                   button_new_game)
+                    pygame.mixer.music.stop()
                     return
 
         screen.blit(pygame.transform.scale(menu_background,
@@ -709,9 +749,13 @@ def game_over_screen(*args):
                           button_quit,
                           arrow,
                           lbl_game_over)
+            pygame.mixer.music.stop()
             return
 
         menu_sprite.update(loc_pressed, arrow)
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("data\Music\menu_soundtrack.wav")
+            pygame.mixer.music.play(-1, 0.0)
         loc_pressed = False
         menu_sprite.draw(screen)
 
@@ -810,7 +854,6 @@ while running:
 
     # print(pygame.mixer.music.get_busy())
 
-
     current_game_mode.move(dirs)
     current_game_mode.next()
 
@@ -818,6 +861,9 @@ while running:
         game_over_screen()
 
     game_sprite.update()
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load("data\Music\soundtrack_3.wav")
+        pygame.mixer.music.play(-1, 0.0)
     game_sprite.draw(screen)
 
     game_arrow_sprite.update()
