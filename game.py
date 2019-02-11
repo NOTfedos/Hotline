@@ -53,19 +53,29 @@ class GameModeArena:
         self.missile_list[-1].move()
 
     def move(self, dir):
-
         if 'N' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.rect.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+            # for i in range(len(self.missile_list)):
+                # self.missile_list[i].y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+
+            for missile in self.missile_list:
+                missile.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'S' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.rect.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+            for missile in self.missile_list:
+                missile.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'W' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.rect.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+            for missile in self.missile_list:
+                missile.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'E' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.rect.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+            for missile in self.missile_list:
+                missile.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
 
     def next(self):
 
@@ -277,23 +287,27 @@ class Missile(pygame.sprite.Sprite):
         self.damage = damage
         self.destruct = False
         self.image, self.rect = rot_center(self.image, self.rect, get_angle(self, (x + dx, y + dy)))
-        self.gip = (dx ** 2 + dy ** 2) ** 0.5
-        self.sin = self.dy / self.gip
-        self.cos = self.dx / self.gip
-        self.x = self.x + self.cos * (self.rect.w + 30)
-        self.y = self.y + self.sin * (self.rect.h + 30)
+        # if dx > 0:
+            # self.x += 50
+        # else:
+            # self.x -= 50
+        # if dy > 0:
+            # self.y += 50
+        # else:
+            # self.y -= 50
+        gip = (dx ** 2 + dy ** 2) ** 0.5
+        self.cos = dx / gip
+        self.sin = dy / gip
+        self.x += round((self.rect.w + current_game_mode.player.rect.w) * self.cos / 2)
+        self.y += round((self.rect.h + current_game_mode.player.rect.h) * self.sin / 2)
         self.set_coords()
 
     def move(self):
-        if self.dx > 0:
-            self.x += round(self.max_velocity / FPS * self.cos)
-        else:
-            self.x -= round(self.max_velocity / FPS * self.cos)
 
-        if self.dy > 0:
-            self.y += round(self.max_velocity / FPS * self.sin)
-        else:
-            self.y -= round(self.max_velocity / FPS * self.cos)
+        self.x += round(self.max_velocity / FPS * self.cos)
+        self.y += round(self.max_velocity / FPS * self.sin)
+
+        self.set_coords()
 
     def update(self, *args):
 
@@ -323,8 +337,8 @@ class Missile(pygame.sprite.Sprite):
             self.kill()
 
     def set_coords(self):
-        self.rect.x = self.x - (self.rect.w // 2) * self.cos
-        self.rect.y = self.y - (self.rect.h // 2) * self.sin
+        self.rect.x = self.x - (self.rect.w // 2)
+        self.rect.y = self.y - (self.rect.h // 2)
 
 
 def label_func(*args):
@@ -777,6 +791,7 @@ while running:
                                        (screen.get_width(),
                                         screen.get_height())), (0, 0))
 
+    print(dirs)
     current_game_mode.move(dirs)
     current_game_mode.next()
 
