@@ -766,8 +766,6 @@ background = load_image("background_game.png")
 dirs = ['', '', '', '']
 
 while running:
-
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             ready_quit_screen()
@@ -803,14 +801,11 @@ while running:
                                        (screen.get_width(),
                                         screen.get_height())), (0, 0))
 
-    print(dirs)
     current_game_mode.move(dirs)
     current_game_mode.next()
 
     if current_game_mode.is_end():
-        print('kek')
         game_over_screen()
-        print('kek 2')
 
     game_sprite.update()
     game_sprite.draw(screen)
