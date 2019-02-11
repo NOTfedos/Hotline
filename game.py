@@ -27,7 +27,7 @@ class GameModeArena:
     PLAYER_VELOCITY = [70, 70, 70, 70]
     MAX_ENEMY_COUNT = [10, 15, 20, 30]
     ENEMY_FULL_HP = [150, 150, 175, 200]
-    MISSILE_MAX_VELO = [60, 80, 100, 130]
+    MISSILE_MAX_VELO = [160, 180, 200, 230]
 
     def __init__(self, difficulty):
         self.difficulty = difficulty
@@ -46,11 +46,11 @@ class GameModeArena:
     def is_pushed(self, pos):
         dx = pos[0] - self.player.x
         dy = pos[1] - self.player.y
-        x = round(self.player.x + dx / abs(dx) * (self.player.rect.w / 2 + 10))
-        y = round(self.player.y + dy / abs(dy) * (self.player.rect.h / 2 + 10))
-        self.missile_list.append(Missile(game_sprite, x, y,
+        self.missile_list.append(Missile(game_sprite, self.player.x, self.player.y,
                                          self.MISSILE_MAX_VELO[self.difficulty],
                                          dx, dy, self.PLAYER_DAMAGE[self.difficulty]))
+
+        self.missile_list[-1].move()
 
     def move(self, dir):
 
@@ -146,10 +146,12 @@ class Button(pygame.sprite.Sprite):
             if self.focused and not(self.image_name.endswith("_focused.png")):
                 self.image_name = self.image_name[:-4] + "_focused.png"
                 self.image = load_image(self.image_name, -1)
+                self.rect.x -= 50
 
             if not self.focused and self.image_name.endswith("_focused.png"):
                 self.image_name = self.image_name[:-12] + '.png'
                 self.image = load_image(self.image_name)
+                self.rect.x += 50
 
         if self.focused and (True in args):
             self.to_return = self.func(self)
@@ -268,51 +270,61 @@ class Missile(pygame.sprite.Sprite):
         self.add(missile_sprite)
         self.image = load_image("missile.png", -1)
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
         self.x, self.y = x, y
         self.max_velocity = max_velo
         self.dx = dx
         self.dy = dy
         self.damage = damage
         self.destruct = False
-        self.image, self.rect = rot_center(self.image, self.rect,get_angle(self, (x + dx, y + dy)))
+        self.image, self.rect = rot_center(self.image, self.rect, get_angle(self, (x + dx, y + dy)))
+        self.gip = (dx ** 2 + dy ** 2) ** 0.5
+        self.sin = self.dy / self.gip
+        self.cos = self.dx / self.gip
+        self.x = self.x + self.cos * (self.rect.w + 30)
+        self.y = self.y + self.sin * (self.rect.h + 30)
+        self.set_coords()
 
-    def update(self, *args):
+    def move(self):
         if self.dx > 0:
-            self.rect.x += round(self.max_velocity / FPS / (1 + abs(self.dy / self.dx)) ** 0.5)
+            self.x += round(self.max_velocity / FPS * self.cos)
         else:
-            self.rect.x -= round(self.max_velocity / FPS / (1 + abs(self.dy / self.dx)) ** 0.5)
+            self.x -= round(self.max_velocity / FPS * self.cos)
 
         if self.dy > 0:
-            self.rect.y += round(self.max_velocity / FPS / (1 + abs(self.dx / self.dy)) ** 0.5)
+            self.y += round(self.max_velocity / FPS * self.sin)
         else:
-            self.rect.y += round(self.max_velocity / FPS / (1 + abs(self.dx / self.dy)) ** 0.5)
+            self.y -= round(self.max_velocity / FPS * self.cos)
+
+    def update(self, *args):
+
+        self.move()
 
         target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
 
         for target in target_dict:
-            target.hp -= self.damage
-            self.destruct = True
+            if self.rect.collidepoint((target.x, target.y)):
+                target.hp -= self.damage
+                self.destruct = True
 
         target_player = pygame.sprite.spritecollideany(self, player_sprite)
 
         if target_player is not None:
-            target_player.hp -= self.damage
+            if self.rect.collidepoint((target_player.x, target_player.y)):
+                target_player.hp -= self.damage
+                self.destruct = True
+
+        if abs(self.x - current_game_mode.player.x) > 1000:
             self.destruct = True
 
-        if abs(self.x + self.dx - self.rect.x) > 1000:
-            self.destruct = True
-
-        if abs(self.y + self.dy - self.rect.y) > 1000:
+        if abs(self.y - current_game_mode.player.y) > 1000:
             self.destruct = True
 
         if self.destruct:
             self.kill()
 
     def set_coords(self):
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.x = self.x - (self.rect.w // 2) * self.cos
+        self.rect.y = self.y - (self.rect.h // 2) * self.sin
 
 
 def label_func(*args):
@@ -648,6 +660,7 @@ def game_over_screen(*args):
                            screen.get_width() // 2,
                            round(screen.get_height() * 0.3),
                            label_func, True)
+    # lbl_game_over.rect.x -= lbl_game_over.rect.w // 2
     button_quit = Button(menu_sprite, "quit.png",
                          screen.get_width() // 2,
                          round(screen.get_height() * 0.9),
@@ -734,7 +747,6 @@ menu_background = load_image("menu_background.png")
 current_game_mode = None
 
 start_screen()
-
 background = load_image("background_game.png")
 
 while running:
@@ -768,7 +780,7 @@ while running:
     current_game_mode.move(dirs)
     current_game_mode.next()
 
-    if current_game_mode.player.hp <= 0:
+    if current_game_mode.is_end():
         print('kek')
         game_over_screen()
         print('kek 2')
