@@ -23,11 +23,11 @@ def load_image(name, colorkey=None):
 class GameModeArena:
 
     PLAYER_FULL_HP = [200, 150, 100, 50]
-    PLAYER_DAMAGE = [100, 75, 75, 50]
-    PLAYER_VELOCITY = [70, 70, 70, 70]
-    MAX_ENEMY_COUNT = [10, 15, 20, 30]
+    PLAYER_DAMAGE = [120, 100, 75, 50]
+    PLAYER_VELOCITY = [150, 140, 130, 120]
+    MAX_ENEMY_COUNT = [3, 5, 7, 15]
     ENEMY_FULL_HP = [150, 150, 175, 200]
-    MISSILE_MAX_VELO = [160, 180, 200, 230]
+    MISSILE_MAX_VELO = [200, 220, 240, 260]
 
     def __init__(self, difficulty):
         self.difficulty = difficulty
@@ -55,7 +55,7 @@ class GameModeArena:
     def move(self, dir):
         if 'N' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             # for i in range(len(self.missile_list)):
                 # self.missile_list[i].y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
 
@@ -63,17 +63,17 @@ class GameModeArena:
                 missile.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'S' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
                 missile.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'W' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
                 missile.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
         if 'E' in dir:
             for enemy in self.enemy_list:
-                enemy.rect.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
             for missile in self.missile_list:
                 missile.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
 
@@ -90,8 +90,7 @@ class GameModeArena:
 
         for enemy in self.enemy_list:
             enemy.image, enemy.rect = rot_center(load_image('enemy.png'), enemy.rect,
-                                                 get_angle(enemy,
-                                                           (self.player.x, self.player.y)))
+                                                 get_angle(enemy, (self.player.x, self.player.y)))
 
         self.player.image, self.player.rect = rot_center(load_image('player.png'),
                                                          self.player.rect,
@@ -209,26 +208,25 @@ class Player(pygame.sprite.Sprite):
 
 
 def enemy_action(enemy, pl, gm):
+
+    if enemy.hp >= 0:
+        enemy.move()
+
     dx = pl.x - enemy.x
     dy = pl.y - enemy.y
-
     if dx > 0:
-        enemy.x += round(enemy.max_velocity / FPS / (1 + abs(dy / dx)) ** 0.5)
+        x = round(enemy.x + (enemy.rect.w / 2 + 10))
     else:
-        enemy.x -= round(enemy.max_velocity / FPS / (1 + abs(dy / dx)) ** 0.5)
-
+        x = round(enemy.x - (enemy.rect.w / 2 + 10))
     if dy > 0:
-        enemy.y += round(enemy.max_velocity / FPS / (1 + abs(dx / dy)) ** 0.5)
+        y = round(enemy.y + (enemy.rect.h / 2 + 10))
     else:
-        enemy.y += round(enemy.max_velocity / FPS / (1 + abs(dx / dy)) ** 0.5)
-
-    dx = pl.x - enemy.x
-    dy = pl.y - enemy.y
-    x = round(enemy.x + dx / abs(dx) * (enemy.rect.w / 2 + 10))
-    y = round(enemy.y + dy / abs(dy) * (enemy.rect.h / 2 + 10))
-    # gm.missile_list.append(Missile(game_sprite, x, y,
-                                   # gm.MISSILE_MAX_VELO[gm.difficulty],
-                                   # dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
+        y = round(enemy.y - (enemy.rect.h / 2 + 10))
+    if enemy.shoot > 60:
+        gm.missile_list.append(Missile(game_sprite, x, y,
+                                       gm.MISSILE_MAX_VELO[gm.difficulty],
+                                       dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
+        enemy.shoot = 0
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -241,12 +239,12 @@ class Enemy(pygame.sprite.Sprite):
         self.damage = 10
         self.counter = 0
         self.shoot = 0
-        self.max_velocity = 10
+        self.max_velocity = 100
         self.x = x
         self.y = y
         self.to_destruct = False
         self.gm = game_mode
-        self.rect.x, self.rect.y = self.x, self.y
+        self.set_coords()
 
     def update(self):
         self.shoot += 1
@@ -267,8 +265,24 @@ class Enemy(pygame.sprite.Sprite):
         return False
 
     def set_coords(self):
-        self.rect.x = self.x
-        self.rect.y = self.y
+
+        self.rect.x = self.x - (self.rect.w // 2)
+        self.rect.y = self.y - (self.rect.h // 2)
+
+    def move(self):
+        dx = self.gm.player.x - self.x
+        dy = self.gm.player.y - self.y
+
+        gip = (dx ** 2 + dy ** 2) ** 0.5
+
+        self.cos = dx / gip
+        self.sin = dy / gip
+
+        self.x += round(self.max_velocity / FPS * self.cos)
+        print(round(self.max_velocity / FPS * self.cos))
+        self.y += round(self.max_velocity / FPS * self.sin)
+
+        self.set_coords()
 
 
 class Missile(pygame.sprite.Sprite):
@@ -669,7 +683,7 @@ def game_over_screen(*args):
     menu_arrow_sprite = pygame.sprite.Group()
 
     arrow = Arrow(menu_arrow_sprite, "menu_arrow.png")
-    lbl_game_over = Button(menu_sprite, "pause.png",
+    lbl_game_over = Button(menu_sprite, "game_over.png",
                            screen.get_width() // 2,
                            round(screen.get_height() * 0.3),
                            label_func, True)
