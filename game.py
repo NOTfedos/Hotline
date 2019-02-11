@@ -279,7 +279,6 @@ class Enemy(pygame.sprite.Sprite):
         self.sin = dy / gip
 
         self.x += round(self.max_velocity / FPS * self.cos)
-        print(round(self.max_velocity / FPS * self.cos))
         self.y += round(self.max_velocity / FPS * self.sin)
 
         self.set_coords()
