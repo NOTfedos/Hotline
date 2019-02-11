@@ -33,7 +33,7 @@ class GameModeArena:
         self.difficulty = difficulty
         self.player = Player(game_sprite, self.PLAYER_FULL_HP[difficulty], self.PLAYER_DAMAGE[difficulty])
         self.enemy_list = []
-        # self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
+        self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
         self.missile_list = []
 
     def spawn_enemies(self, count):
@@ -316,9 +316,8 @@ class Missile(pygame.sprite.Sprite):
         target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
 
         for target in target_dict:
-            if self.rect.collidepoint((target.x, target.y)):
-                target.hp -= self.damage
-                self.destruct = True
+            target.hp -= self.damage
+            self.destruct = True
 
         target_player = pygame.sprite.spritecollideany(self, player_sprite)
 
