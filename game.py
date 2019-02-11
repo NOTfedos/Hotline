@@ -24,10 +24,10 @@ class GameModeArena:
 
     PLAYER_FULL_HP = [200, 150, 100, 50]
     PLAYER_DAMAGE = [120, 100, 75, 50]
-    PLAYER_VELOCITY = [150, 140, 130, 120]
+    PLAYER_VELOCITY = [350, 340, 330, 320]
     MAX_ENEMY_COUNT = [3, 5, 7, 15]
     ENEMY_FULL_HP = [150, 150, 175, 200]
-    MISSILE_MAX_VELO = [200, 220, 240, 260]
+    MISSILE_MAX_VELO = [400, 420, 440, 460]
 
     def __init__(self, difficulty):
         self.difficulty = difficulty
@@ -145,6 +145,7 @@ class Button(pygame.sprite.Sprite):
         self.focused = False
         self.to_return = False
         self.label = label
+        self.sound = pygame.mixer.Sound("data\Music\sound_click.wav")
 
     def update(self, *args):
         if self.rect.collidepoint((args[1].rect.x, args[1].rect.y)):
@@ -153,6 +154,7 @@ class Button(pygame.sprite.Sprite):
             self.focused = False
         if not self.label:
             if self.focused and not(self.image_name.endswith("_focused.png")):
+                self.play_sound()
                 self.image_name = self.image_name[:-4] + "_focused.png"
                 self.image = load_image(self.image_name, -1)
                 self.rect.x -= 50
@@ -163,7 +165,13 @@ class Button(pygame.sprite.Sprite):
                 self.rect.x += 50
 
         if self.focused and (True in args):
+            self.play_sound()
             self.to_return = self.func(self)
+
+    def play_sound(self):
+        # if not self.label:
+            # self.sound.play()
+        pass
 
 
 class Arrow(pygame.sprite.Sprite):
@@ -217,11 +225,11 @@ def enemy_action(enemy, pl, gm):
     if dx > 0:
         x = round(enemy.x + (enemy.rect.w / 2 + 10))
     else:
-        x = round(enemy.x - (enemy.rect.w / 2 + 10))
+        x = round(enemy.x - (enemy.rect.w / 2 - 10))
     if dy > 0:
         y = round(enemy.y + (enemy.rect.h / 2 + 10))
     else:
-        y = round(enemy.y - (enemy.rect.h / 2 + 10))
+        y = round(enemy.y - (enemy.rect.h / 2 - 10))
     if enemy.shoot > 60:
         gm.missile_list.append(Missile(game_sprite, x, y,
                                        gm.MISSILE_MAX_VELO[gm.difficulty],
@@ -240,7 +248,7 @@ class Enemy(pygame.sprite.Sprite):
         self.damage = 10
         self.counter = 0
         self.shoot = 0
-        self.max_velocity = 100
+        self.max_velocity = 320
         self.x = x
         self.y = y
         self.to_destruct = False
@@ -825,9 +833,9 @@ while running:
                                        (screen.get_width(),
                                         screen.get_height())), (0, 0))
 
-    print(pygame.mixer.get_busy())
+    # print(pygame.mixer.music.get_busy())
 
-    if pygame.mixer.get_busy():
+    if not pygame.mixer.music.get_busy():
         if i == BASSES:
             i = 1
         else:
