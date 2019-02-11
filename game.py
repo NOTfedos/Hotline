@@ -763,9 +763,10 @@ current_game_mode = None
 start_screen()
 background = load_image("background_game.png")
 
+dirs = ['', '', '', '']
+
 while running:
 
-    dirs = ''
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -774,13 +775,24 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 menu_screen()  # open menu
             if event.key == pygame.K_a:
-                dirs += 'W'
+                dirs[0] = 'W'
             if event.key == pygame.K_d:
-                dirs += 'E'
+                dirs[1] = 'E'
             if event.key == pygame.K_w:
-                dirs += 'N'
+                dirs[2] = 'N'
             if event.key == pygame.K_s:
-                dirs += 'S'
+                dirs[3] = 'S'
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_ESCAPE:
+                menu_screen()  # open menu
+            if event.key == pygame.K_a:
+                dirs[0] = ''
+            if event.key == pygame.K_d:
+                dirs[1] = ''
+            if event.key == pygame.K_w:
+                dirs[2] = ''
+            if event.key == pygame.K_s:
+                dirs[3] = ''
         if event.type == pygame.MOUSEBUTTONDOWN:
             current_game_mode.is_pushed(event.pos)
         if event.type == pygame.MOUSEMOTION:
