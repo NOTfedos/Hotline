@@ -6,7 +6,7 @@ import math
 
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('data\sprites', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error as message:
@@ -746,12 +746,22 @@ def reset_sprites(*args):
 
 
 def terminate(*args):
+    pygame.mixer.quit()
     pygame.quit()
     sys.exit()
 
 
+pygame.init()
 running = True
 lock_fps = True
+
+BASSES = 2
+i = 1
+
+pygame.mixer.init()
+pygame.mixer.music.load("data\Music\soundtrack_" + str(i) + '.mp3')
+pygame.mixer.music.play(1, 0.0)
+
 screen = pygame.display.set_mode((1280, 720))
 pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
@@ -814,6 +824,16 @@ while running:
     screen.blit(pygame.transform.scale(background,
                                        (screen.get_width(),
                                         screen.get_height())), (0, 0))
+
+    print(pygame.mixer.get_busy())
+
+    if pygame.mixer.get_busy():
+        if i == BASSES:
+            i = 1
+        else:
+            i += 1
+        pygame.mixer.music.load("data\Music\soundtrack_" + str(i) + ".mp3")
+        pygame.mixer.music.play(1, 0.0)
 
     current_game_mode.move(dirs)
     current_game_mode.next()
