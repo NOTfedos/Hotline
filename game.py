@@ -36,13 +36,6 @@ class Velocity:
 
 class GameModeArena:
 
-    PLAYER_FULL_HP = [200, 150, 100, 50]
-    PLAYER_DAMAGE = [120, 100, 75, 50]
-    PLAYER_VELOCITY = [350, 340, 330, 320]
-    MAX_ENEMY_COUNT = [3, 5, 7, 15]
-    ENEMY_FULL_HP = [150, 150, 175, 200]
-    MISSILE_MAX_VELO = [400, 420, 440, 460]
-
     def __init__(self, gsprite):
         self.game_sprite = gsprite
         self.enemy_list = []
@@ -56,14 +49,14 @@ class GameModeArena:
 
     def start(self):
         self.player = Player(self)
-        self.spawn_enemies(self, self.MAX_ENEMY_COUNT[self.difficulty])
+        self.spawn_enemies(self, gs.MAX_ENEMY_COUNT[self.difficulty])
 
     def spawn_enemies(self, count):
         for k in range(count):
-            self.enemy_list.append(Enemy(game_sprite,
+            self.enemy_list.append(Enemy(self,
                                          random.choice(list(range(200)) + list(range(1000, 1200))),
-                                         random.choice(list(range(200)) + list(range(500, 700))), self))
-            self.enemy_list[k].hp = self.ENEMY_FULL_HP[self.difficulty]
+                                         random.choice(list(range(200)) + list(range(500, 700)))))
+            self.enemy_list[k].hp = gs.ENEMY_FULL_HP[self.difficulty]
 
     def set_difficulty(self, dif):
         self.difficulty = dif
@@ -73,29 +66,30 @@ class GameModeArena:
         self.player.shoot(pos)
 
     def move(self, direction):
+
         if 'N' in direction:
             for enemy in self.enemy_list:
-                enemy.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
             # for i in range(len(self.missile_list)):
                 # self.missile_list[i].y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
 
             for missile in self.missile_list:
-                missile.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                missile.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'S' in direction:
             for enemy in self.enemy_list:
-                enemy.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.y -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                missile.y -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'W' in direction:
             for enemy in self.enemy_list:
-                enemy.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.x += gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
+                missile.x += gs.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'E' in direction:
             for enemy in self.enemy_list:
-                enemy.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                enemy.x -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
+                missile.x -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
 
     def next(self):
 
@@ -216,8 +210,7 @@ class Player(pygame.sprite.Sprite):
         self.x = screen.get_width() // 2
         self.y = screen.get_height() // 2
         self.set_coords()
-        self.hp = full_hp
-        self.damage = damage
+        self.hp = gs.PLAYER_FULL_HP[game_mode.difficulty]
 
     def update(self):
         pass
@@ -259,17 +252,17 @@ def enemy_action(enemy, pl, gm):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, x, y, game_mode):
-        super().__init__(group)
-        self.add(enemy_sprite)
+
+    def __init__(self, game_mode, x, y):
+        super().__init__(game_mode.game_sprite)
+        self.add(game_mode.enemy_sprite)
         self.name_image = 'enemy.png'
         self.image = load_image(self.name_image)
         self.rect = self.image.get_rect()
-        self.hp = 100
-        self.damage = 10
-        self.counter = 0
-        self.shoot = 0
-        self.max_velocity = 320
+        self.hp = gs.ENEMY_FULL_HP[game_mode.difficulty]
+        self.destruct_counter = 0
+        self.shoot_counter = 0
+        self.max_velocity = gs.ENEMY_VELOCITY[game_mode.difficulty]
         self.x = x
         self.y = y
         self.to_destruct = False
