@@ -244,11 +244,11 @@ def enemy_action(enemy, pl, gm):
         y = round(enemy.rect.y + (enemy.rect.h / 2 + 10))
     else:
         y = round(enemy.rect.y - (enemy.rect.h / 2 - 10))
-    if enemy.shoot > 60:
+    if enemy.shoot_counter > 60:
         gm.missile_list.append(Missile(game_sprite, x, y,
                                        gm.MISSILE_MAX_VELO[gm.difficulty],
                                        dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
-        enemy.shoot = 0
+        enemy.shoot_counter = 0
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -266,46 +266,44 @@ class Enemy(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.to_destruct = False
-        self.gm = game_mode
+        self.game_mode = game_mode
         self.set_coords()
-        self.sin = 1
-        self.cos = 0
 
     def update(self):
-        self.shoot += 1
+
+        self.shoot_counter += 1
         if self.hp <= 0:
             self.name_image = 'enemy_killed.png'
             if self.get_animation_died():
                 self.to_destruct = True
                 self.kill()
 
-        enemy_action(self, current_game_mode.player, self.gm)
+        enemy_action(self, current_game_mode.player, self.game_mode)
 
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.set_coords()
 
     def get_animation_died(self):
-        self.counter += 1
-        if self.counter > 60:
+        self.destruct_counter += 1
+        if self.destruct_counter > 50:
             return True
         return False
 
     def set_coords(self):
 
-        self.rect.x = self.x - (self.rect.w // 2)
-        self.rect.y = self.y - (self.rect.h // 2)
+        self.rect.x = round(self.x - self.rect.w / 2)
+        self.rect.y = round(self.y - self.rect.h / 2)
 
     def move(self):
-        dx = self.gm.player.rect.x - self.rect.x
-        dy = self.gm.player.rect.y - self.rect.y
+        dx = self.game_mode.player.x - self.x
+        dy = self.game_mode.player.y - self.y
 
         gip = (dx ** 2 + dy ** 2) ** 0.5
 
-        self.cos = dx / gip
-        self.sin = dy / gip
+        cos = dx / gip
+        sin = dy / gip
 
-        self.x += round(self.max_velocity / FPS * self.cos)
-        self.y += round(self.max_velocity / FPS * self.sin)
+        self.x += self.max_velocity / FPS * cos
+        self.y += self.max_velocity / FPS * sin
 
         self.set_coords()
 
