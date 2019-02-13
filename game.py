@@ -20,6 +20,19 @@ def load_image(name, colorkey=None):
     return image
 
 
+class Velocity:
+
+    def __init__(self, dx, dy, module):
+        self.x = dx
+        self.y = dy
+        self.module = module
+        gip = (dx ** 2 + dy ** 2) ** 0.5
+        self.cos = dx / gip
+        self.sin = dy / gip
+        self.v_x = self.module * self.cos
+        self.v_y = self.module * self.sin
+
+
 class GameModeArena:
 
     PLAYER_FULL_HP = [200, 150, 100, 50]
@@ -210,16 +223,16 @@ def enemy_action(enemy, pl, gm):
     if enemy.hp >= 0:
         enemy.move()
 
-    dx = pl.x - enemy.x
-    dy = pl.y - enemy.y
+    dx = pl.rect.x - enemy.rect.x
+    dy = pl.rect.y - enemy.rect.y
     if dx > 0:
-        x = round(enemy.x + (enemy.rect.w / 2 + 10))
+        x = round(enemy.rect.x + (enemy.rect.w / 2 + 10))
     else:
-        x = round(enemy.x - (enemy.rect.w / 2 - 10))
+        x = round(enemy.rect.x - (enemy.rect.w / 2 - 10))
     if dy > 0:
-        y = round(enemy.y + (enemy.rect.h / 2 + 10))
+        y = round(enemy.rect.y + (enemy.rect.h / 2 + 10))
     else:
-        y = round(enemy.y - (enemy.rect.h / 2 - 10))
+        y = round(enemy.rect.y - (enemy.rect.h / 2 - 10))
     if enemy.shoot > 60:
         gm.missile_list.append(Missile(game_sprite, x, y,
                                        gm.MISSILE_MAX_VELO[gm.difficulty],
@@ -272,8 +285,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = self.y - (self.rect.h // 2)
 
     def move(self):
-        dx = self.gm.player.x - self.x
-        dy = self.gm.player.y - self.y
+        dx = self.gm.player.rect.x - self.rect.x
+        dy = self.gm.player.rect.y - self.rect.y
 
         gip = (dx ** 2 + dy ** 2) ** 0.5
 
@@ -329,9 +342,9 @@ class Missile(pygame.sprite.Sprite):
         target_player = pygame.sprite.spritecollideany(self, player_sprite)
 
         if target_player is not None:
-            if self.rect.collidepoint((target_player.x, target_player.y)):
-                target_player.hp -= self.damage
-                self.destruct = True
+            # if self.rect.collidepoint((target_player.x, target_player.y)):
+            current_game_mode.player.hp -= self.damage
+            self.destruct = True
 
         if abs(self.x - current_game_mode.player.x) > 1000:
             self.destruct = True
