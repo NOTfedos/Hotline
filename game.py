@@ -44,12 +44,14 @@ class GameModeArena:
         self.missile_sprite = pygame.sprite.Group()
         self.enemy_sprite = pygame.sprite.Group()
         self.arrow_sprite = pygame.sprite.Group()
+        self.enemies_to_spawn = gs.MAX_ENEMY_COUNT[self.difficulty]
+        self.ticks_to_spawn = None
         self.difficulty = None
         self.player = None
 
     def start(self):
         self.player = Player(self)
-        self.spawn_enemies(self, gs.MAX_ENEMY_COUNT[self.difficulty])
+        self.spawn_enemies(self, self.enemies_to_spawn)
 
     def spawn_enemies(self, count):
         for k in range(count):
@@ -62,7 +64,6 @@ class GameModeArena:
         self.difficulty = dif
 
     def is_pushed(self, pos):
-
         self.player.shoot(pos)
 
     def move(self, direction):
@@ -211,6 +212,7 @@ class Player(pygame.sprite.Sprite):
         self.y = screen.get_height() // 2
         self.set_coords()
         self.hp = gs.PLAYER_FULL_HP[game_mode.difficulty]
+        self.game_mode = game_mode
 
     def update(self):
         pass
@@ -222,14 +224,13 @@ class Player(pygame.sprite.Sprite):
     def shoot(self, pos):
         dx = pos[0] - self.x
         dy = pos[1] - self.y
-        self.missile_list.append(Missile(game_sprite, self.player.x, self.player.y,
-                                         self.MISSILE_MAX_VELO[self.difficulty],
-                                         dx, dy, self.PLAYER_DAMAGE[self.difficulty]))
-
-        self.missile_list[-1].move()
+        self.game_mode.missile_list.append(Missile(self.game_mode, self.x,
+                                                   self.y, dx, dy, self))
 
 
-def enemy_action(enemy, pl, gm):
+def enemy_action(enemy, gm):
+
+    pl = gm.player
 
     if enemy.hp >= 0:
         enemy.move()
@@ -278,7 +279,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.to_destruct = True
                 self.kill()
 
-        enemy_action(self, current_game_mode.player, self.game_mode)
+        enemy_action(self, self.game_mode)
 
         self.set_coords()
 
@@ -306,6 +307,12 @@ class Enemy(pygame.sprite.Sprite):
         self.y += self.max_velocity / FPS * sin
 
         self.set_coords()
+
+    def shoot(self, pos):
+        dx = pos[0] - self.x
+        dy = pos[1] - self.y
+        self.game_mode.missile_list.append(Missile(self.game_mode, self.x,
+                                                   self.y, dx, dy, self))
 
 
 class Missile(pygame.sprite.Sprite):
