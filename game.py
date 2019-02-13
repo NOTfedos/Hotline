@@ -40,11 +40,17 @@ class GameModeArena:
         self.game_sprite = gsprite
         self.enemy_list = []
         self.missile_list = []
+
         self.player_sprite = pygame.sprite.Group()
         self.missile_sprite = pygame.sprite.Group()
         self.enemy_sprite = pygame.sprite.Group()
         self.arrow_sprite = pygame.sprite.Group()
+        
         self.enemies_to_spawn = gs.MAX_ENEMY_COUNT[self.difficulty]
+
+        self.arrow = Arrow(self.game_sprite, "game_arrow.png")
+        self.arrow.add(self.arrow_sprite)
+
         self.ticks_to_spawn = None
         self.difficulty = None
         self.player = None
@@ -68,7 +74,7 @@ class GameModeArena:
 
     def move(self, direction):
 
-        if 'N' in direction:
+        if 0 in direction:
             for enemy in self.enemy_list:
                 enemy.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
             # for i in range(len(self.missile_list)):
@@ -76,17 +82,17 @@ class GameModeArena:
 
             for missile in self.missile_list:
                 missile.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
-        if 'S' in direction:
+        if 1 in direction:
             for enemy in self.enemy_list:
                 enemy.y -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
                 missile.y -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
-        if 'W' in direction:
+        if 2 in direction:
             for enemy in self.enemy_list:
                 enemy.x += gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
                 missile.x += gs.PLAYER_VELOCITY[self.difficulty] / FPS
-        if 'E' in direction:
+        if 3 in direction:
             for enemy in self.enemy_list:
                 enemy.x -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
@@ -110,8 +116,8 @@ class GameModeArena:
         self.player.image, self.player.rect = rot_center(load_image('player.png'),
                                                          self.player.rect,
                                                          get_angle(self.player,
-                                                                   (game_arrow.rect.x + game_arrow.rect.w // 2,
-                                                                    game_arrow.rect.y + game_arrow.rect.h // 2)))
+                                                                   (self.arrow.rect.x,
+                                                                    self.arrow.rect.y)))
 
     def is_end(self):
         if self.player.hp <= 0:
@@ -194,7 +200,6 @@ class Button(pygame.sprite.Sprite):
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, group, image_name):
         super().__init__(group)
-        self.add(arrow_sprite)
         self.image = load_image(image_name, -1)
         self.rect = self.image.get_rect()
 
@@ -832,10 +837,10 @@ player_sprite = pygame.sprite.Group()
 missile_sprite = pygame.sprite.Group()
 button_sprite = pygame.sprite.Group()
 arrow_sprite = pygame.sprite.Group()
-game_arrow_sprite = pygame.sprite.Group()
+# game_arrow_sprite = pygame.sprite.Group()
 
 
-game_arrow = Arrow(game_arrow_sprite, "game_arrow.png")
+# game_arrow = Arrow(game_arrow_sprite, "game_arrow.png")
 menu_background = load_image("menu_background.png")
 
 current_game_mode = None
@@ -853,27 +858,28 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 menu_screen()  # open menu
             if event.key == pygame.K_a:
-                dirs[0] = 'W'
+                dirs[0] = 2
             if event.key == pygame.K_d:
-                dirs[1] = 'E'
+                dirs[1] = 3
             if event.key == pygame.K_w:
-                dirs[2] = 'N'
+                dirs[2] = 0
             if event.key == pygame.K_s:
-                dirs[3] = 'S'
+                dirs[3] = 1
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 menu_screen()  # open menu
             if event.key == pygame.K_a:
-                dirs[0] = ''
+                dirs[0] = -1
             if event.key == pygame.K_d:
-                dirs[1] = ''
+                dirs[1] = -1
             if event.key == pygame.K_w:
-                dirs[2] = ''
+                dirs[2] = -1
             if event.key == pygame.K_s:
-                dirs[3] = ''
+                dirs[3] = -1
         if event.type == pygame.MOUSEBUTTONDOWN:
             current_game_mode.is_pushed(event.pos)
         if event.type == pygame.MOUSEMOTION:
+            current_game_mode.update_arrow(event.pos)
             game_arrow.rect.x = event.pos[0]
             game_arrow.rect.y = event.pos[1]
 
@@ -895,8 +901,8 @@ while running:
         pygame.mixer.music.play(-1, 0.0)
     game_sprite.draw(screen)
 
-    game_arrow_sprite.update()
-    game_arrow_sprite.draw(screen)
+    # game_arrow_sprite.update()
+    # game_arrow_sprite.draw(screen)
 
     pygame.display.flip()
 
