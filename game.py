@@ -45,7 +45,7 @@ class GameModeArena:
         self.missile_sprite = pygame.sprite.Group()
         self.enemy_sprite = pygame.sprite.Group()
         self.arrow_sprite = pygame.sprite.Group()
-        
+
         self.enemies_to_spawn = gs.MAX_ENEMY_COUNT[self.difficulty]
 
         self.arrow = Arrow(self.game_sprite, "game_arrow.png")
@@ -97,6 +97,10 @@ class GameModeArena:
                 enemy.x -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
                 missile.x -= gs.PLAYER_VELOCITY[self.difficulty] / FPS
+
+    def update_arrow(self, pos):
+        self.arrow.rect.x = pos[0]
+        self.arrow.rect.y = pos[1]
 
     def next(self):
 
@@ -324,16 +328,16 @@ class Missile(pygame.sprite.Sprite):
 
     global FPS
 
-    def __init__(self, group, x, y, max_velo, dx, dy, damage):
-        super().__init__(group)
-        self.add(missile_sprite)
+    def __init__(self, game_mode, x, y, dx, dy, entity):
+        super().__init__(game_mode.game_sprite)
+        self.add(game_mode.missile_sprite)
         self.image = load_image("missile.png", -1)
         self.rect = self.image.get_rect()
         self.x, self.y = x, y
-        self.max_velocity = max_velo
+        self.max_velocity = gs.MISSILE_MAX_VELO[game_mode.difficulty]
         self.dx = dx
         self.dy = dy
-        self.damage = damage
+        self.damage = gs.MISSILE_DAMAGE[game_mode.difficulty]
         self.destruct = False
         self.image, self.rect = rot_center(self.image, self.rect, get_angle(self, (x + dx, y + dy)))
         gip = (dx ** 2 + dy ** 2) ** 0.5
@@ -848,7 +852,7 @@ current_game_mode = None
 start_screen()
 background = load_image("background_game.png")
 
-dirs = ['', '', '', '']
+dirs = [-1, -1, -1, -1]
 
 while running:
     for event in pygame.event.get():
@@ -880,8 +884,6 @@ while running:
             current_game_mode.is_pushed(event.pos)
         if event.type == pygame.MOUSEMOTION:
             current_game_mode.update_arrow(event.pos)
-            game_arrow.rect.x = event.pos[0]
-            game_arrow.rect.y = event.pos[1]
 
     screen.blit(pygame.transform.scale(background,
                                        (screen.get_width(),
