@@ -3,6 +3,7 @@ import pygame
 import os
 import random
 import math
+from src import constant_settings as gs
 
 
 def load_image(name, colorkey=None):
@@ -42,12 +43,20 @@ class GameModeArena:
     ENEMY_FULL_HP = [150, 150, 175, 200]
     MISSILE_MAX_VELO = [400, 420, 440, 460]
 
-    def __init__(self, difficulty):
-        self.difficulty = difficulty
-        self.player = Player(game_sprite, self.PLAYER_FULL_HP[difficulty], self.PLAYER_DAMAGE[difficulty])
+    def __init__(self, gsprite):
+        self.game_sprite = gsprite
         self.enemy_list = []
-        self.spawn_enemies(self.MAX_ENEMY_COUNT[difficulty])
         self.missile_list = []
+        self.player_sprite = pygame.sprite.Group()
+        self.missile_sprite = pygame.sprite.Group()
+        self.enemy_sprite = pygame.sprite.Group()
+        self.arrow_sprite = pygame.sprite.Group()
+        self.difficulty = None
+        self.player = None
+
+    def start(self):
+        self.player = Player(self)
+        self.spawn_enemies(self, self.MAX_ENEMY_COUNT[self.difficulty])
 
     def spawn_enemies(self, count):
         for k in range(count):
@@ -56,39 +65,37 @@ class GameModeArena:
                                          random.choice(list(range(200)) + list(range(500, 700))), self))
             self.enemy_list[k].hp = self.ENEMY_FULL_HP[self.difficulty]
 
-    def is_pushed(self, pos):
-        dx = pos[0] - self.player.x
-        dy = pos[1] - self.player.y
-        self.missile_list.append(Missile(game_sprite, self.player.x, self.player.y,
-                                         self.MISSILE_MAX_VELO[self.difficulty],
-                                         dx, dy, self.PLAYER_DAMAGE[self.difficulty]))
+    def set_difficulty(self, dif):
+        self.difficulty = dif
 
-        self.missile_list[-1].move()
+    def is_pushed(self, pos):
+
+        self.player.shoot(pos)
 
     def move(self, direction):
         if 'N' in direction:
             for enemy in self.enemy_list:
-                enemy.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
             # for i in range(len(self.missile_list)):
                 # self.missile_list[i].y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
 
             for missile in self.missile_list:
-                missile.y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                missile.y += self.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'S' in direction:
             for enemy in self.enemy_list:
-                enemy.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.y -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                missile.y -= self.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'W' in direction:
             for enemy in self.enemy_list:
-                enemy.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.x += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                missile.x += self.PLAYER_VELOCITY[self.difficulty] / FPS
         if 'E' in direction:
             for enemy in self.enemy_list:
-                enemy.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                enemy.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
             for missile in self.missile_list:
-                missile.x -= round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
+                missile.x -= self.PLAYER_VELOCITY[self.difficulty] / FPS
 
     def next(self):
 
@@ -107,7 +114,9 @@ class GameModeArena:
 
         self.player.image, self.player.rect = rot_center(load_image('player.png'),
                                                          self.player.rect,
-                                                         get_angle(self.player, (game_arrow.rect.x, game_arrow.rect.y)))
+                                                         get_angle(self.player,
+                                                                   (game_arrow.rect.x + game_arrow.rect.w // 2,
+                                                                    game_arrow.rect.y + game_arrow.rect.h // 2)))
 
     def is_end(self):
         if self.player.hp <= 0:
@@ -199,9 +208,9 @@ class Arrow(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, full_hp, damage):
-        super().__init__(group)
-        self.add(player_sprite)
+    def __init__(self, game_mode):
+        super().__init__(game_mode.game_sprite)
+        self.add(game_mode.player_sprite)
         self.image = load_image("player.png")
         self.rect = self.image.get_rect()
         self.x = screen.get_width() // 2
@@ -214,8 +223,17 @@ class Player(pygame.sprite.Sprite):
         pass
 
     def set_coords(self):
-        self.rect.x = self.x - self.rect.w // 2
-        self.rect.y = self.y - self.rect.h // 2
+        self.rect.x = round(self.x - self.rect.w // 2)
+        self.rect.y = round(self.y - self.rect.h // 2)
+
+    def shoot(self, pos):
+        dx = pos[0] - self.x
+        dy = pos[1] - self.y
+        self.missile_list.append(Missile(game_sprite, self.player.x, self.player.y,
+                                         self.MISSILE_MAX_VELO[self.difficulty],
+                                         dx, dy, self.PLAYER_DAMAGE[self.difficulty]))
+
+        self.missile_list[-1].move()
 
 
 def enemy_action(enemy, pl, gm):
