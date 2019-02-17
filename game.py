@@ -56,8 +56,11 @@ class GameModeArena:
         self.player = None
 
     def start(self):
+
         self.player = Player(self)
-        self.spawn_enemies(self, self.enemies_to_spawn)
+        self.spawn_enemies(2)
+        self.enemies_to_spawn -= 2
+        self.ticks_to_spawn = 0
 
     def spawn_enemies(self, count):
         for k in range(count):
@@ -77,9 +80,6 @@ class GameModeArena:
         if 0 in direction:
             for enemy in self.enemy_list:
                 enemy.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
-            # for i in range(len(self.missile_list)):
-                # self.missile_list[i].y += round(self.PLAYER_VELOCITY[self.difficulty] / FPS)
-
             for missile in self.missile_list:
                 missile.y += gs.PLAYER_VELOCITY[self.difficulty] / FPS
         if 1 in direction:
@@ -111,7 +111,7 @@ class GameModeArena:
         for enemy in self.enemy_list:
             if enemy.to_destruct:
                 self.enemy_list.remove(enemy)
-                self.spawn_enemies(1)
+                self.enemies_to_spawn += 1
 
         for enemy in self.enemy_list:
             enemy.image, enemy.rect = rot_center(load_image(enemy.name_image), enemy.rect,
@@ -122,6 +122,13 @@ class GameModeArena:
                                                          get_angle(self.player,
                                                                    (self.arrow.rect.x,
                                                                     self.arrow.rect.y)))
+
+        self.ticks_to_spawn += 1
+
+        if self.ticks_to_spawn > gs.ENEMY_SPAWN_TIME[self.difficulty]:
+            self.spawn_enemies(1)
+            self.enemies_to_spawn -= 1
+            self.ticks_to_spawn = 0
 
     def is_end(self):
         if self.player.hp <= 0:
