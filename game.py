@@ -347,7 +347,7 @@ class Missile(pygame.sprite.Sprite):
     def __init__(self, game_mode, x, y, dx, dy, entity):
         super().__init__(game_mode.game_sprite)
         self.add(game_mode.missile_sprite)
-        self.image = load_image("missile.png", -1)
+        self.image = MISSILE_IMAGE
         self.rect = self.image.get_rect()
         self.x, self.y = x, y
         self.max_velocity = gs.MISSILE_MAX_VELO[game_mode.difficulty]
@@ -856,6 +856,8 @@ clock = pygame.time.Clock()
 FPS = 60
 
 # GAME_MODES = {'ARENA': arena_action, 'LEVEL': level_action}
+
+MISSILE_IMAGE = pygame.transform.scale(load_image("missile.png", -1), (30, 60))
 
 game_sprite = pygame.sprite.Group()
 enemy_sprite = pygame.sprite.Group()
