@@ -54,8 +54,8 @@ class GameModeArena:
         self.arrow.add(self.arrow_sprite)
 
         self.player = Player(self)
-        self.spawn_enemies(2)
-        self.enemies_to_spawn -= 2
+        self.spawn_enemies(self.enemies_to_spawn // 2)
+        self.enemies_to_spawn -= self.enemies_to_spawn // 2
         self.ticks_to_spawn = 0
 
     def start(self):
@@ -117,7 +117,7 @@ class GameModeArena:
                 self.enemies_to_spawn += 1
 
         for enemy in self.enemy_list:
-            if not enemy.to_destruct:
+            if not enemy.is_died:
                 enemy.image, enemy.rect = rot_center(load_image(enemy.name_image), enemy.rect,
                                                      get_angle(enemy, (self.player.x, self.player.y)))
 
@@ -285,6 +285,7 @@ class Enemy(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.to_destruct = False
+        self.is_died = False
         self.game_mode = game_mode
         self.set_coords()
 
@@ -292,12 +293,17 @@ class Enemy(pygame.sprite.Sprite):
 
         self.shoot_counter += 1
         if self.hp <= 0:
-            self.name_image = 'enemy_killed.png'
+            self.is_died = True
+            if self.name_image != 'enemy_killed.png':
+                self.name_image = 'enemy_killed.png'
+                self.image, self.rect = rot_center(load_image(self.name_image), self.rect,
+                                                   get_angle(self, (self.game_mode.player.x, self.game_mode.player.y)))
             if self.get_animation_died():
                 self.to_destruct = True
                 self.kill()
         else:
-            enemy_action(self, self.game_mode)
+            if not self.is_died:
+                enemy_action(self, self.game_mode)
 
         self.set_coords()
 
@@ -327,6 +333,7 @@ class Enemy(pygame.sprite.Sprite):
         self.set_coords()
 
     def shoot(self, pos):
+        print('kek')
         dx = pos[0] - self.x
         dy = pos[1] - self.y
         self.game_mode.missile_list.append(Missile(self.game_mode, self.x,
