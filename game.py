@@ -117,8 +117,9 @@ class GameModeArena:
                 self.enemies_to_spawn += 1
 
         for enemy in self.enemy_list:
-            enemy.image, enemy.rect = rot_center(load_image(enemy.name_image), enemy.rect,
-                                                 get_angle(enemy, (self.player.x, self.player.y)))
+            if not enemy.to_destruct:
+                enemy.image, enemy.rect = rot_center(load_image(enemy.name_image), enemy.rect,
+                                                     get_angle(enemy, (self.player.x, self.player.y)))
 
         self.player.image, self.player.rect = rot_center(load_image('player.png'),
                                                          self.player.rect,
@@ -295,14 +296,14 @@ class Enemy(pygame.sprite.Sprite):
             if self.get_animation_died():
                 self.to_destruct = True
                 self.kill()
-
-        enemy_action(self, self.game_mode)
+        else:
+            enemy_action(self, self.game_mode)
 
         self.set_coords()
 
     def get_animation_died(self):
         self.destruct_counter += 1
-        if self.destruct_counter > 50:
+        if self.destruct_counter > 100:
             return True
         return False
 
