@@ -36,7 +36,7 @@ class Velocity:
 
 class GameModeArena:
 
-    def __init__(self, difficulty):
+    def __init__(self, difficulty=1):
         self.enemy_list = []
         self.missile_list = []
 
@@ -53,8 +53,10 @@ class GameModeArena:
         self.arrow = Arrow(self.game_sprite, "game_arrow.png")
         self.arrow.add(self.arrow_sprite)
 
-        self.ticks_to_spawn = None
-        self.player = None
+        self.player = Player(self)
+        self.spawn_enemies(2)
+        self.enemies_to_spawn -= 2
+        self.ticks_to_spawn = 0
 
     def start(self):
 
@@ -352,6 +354,7 @@ class Missile(pygame.sprite.Sprite):
         self.x += round((self.rect.w + current_game_mode.player.rect.w) * self.cos / 2)
         self.y += round((self.rect.h + current_game_mode.player.rect.h) * self.sin / 2)
         self.sender = entity
+        self.game_mode = game_mode
         self.set_coords()
 
     def move(self):
@@ -365,14 +368,15 @@ class Missile(pygame.sprite.Sprite):
 
         self.move()
 
-        target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
+        target_dict = pygame.sprite.spritecollide(self, self.game_mode.enemy_sprite, False, False)
 
         for target in target_dict:
+
             if target != self.sender:
                 target.hp -= self.damage
                 self.destruct = True
 
-        target_player = pygame.sprite.spritecollideany(self, player_sprite)
+        target_player = pygame.sprite.spritecollideany(self, self.game_mode.player_sprite)
 
         if target_player is not None:
             # if self.rect.collidepoint((target_player.x, target_player.y)):
@@ -453,7 +457,7 @@ def start_screen(*args):
                           arrow,
                           lbl_start)
             pygame.mixer.music.stop()
-            current_game_mode.start()
+            # current_game_mode.start()
             return
 
         menu_sprite.update(loc_pressed, arrow)
