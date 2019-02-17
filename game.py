@@ -36,11 +36,13 @@ class Velocity:
 
 class GameModeArena:
 
-    def __init__(self, gsprite):
-        self.game_sprite = gsprite
+    def __init__(self, difficulty):
         self.enemy_list = []
         self.missile_list = []
 
+        self.difficulty = difficulty
+
+        self.game_sprite = pygame.sprite.Group()
         self.player_sprite = pygame.sprite.Group()
         self.missile_sprite = pygame.sprite.Group()
         self.enemy_sprite = pygame.sprite.Group()
@@ -52,7 +54,6 @@ class GameModeArena:
         self.arrow.add(self.arrow_sprite)
 
         self.ticks_to_spawn = None
-        self.difficulty = None
         self.player = None
 
     def start(self):
@@ -262,9 +263,7 @@ def enemy_action(enemy, gm):
     else:
         y = round(enemy.rect.y - (enemy.rect.h / 2 - 10))
     if enemy.shoot_counter > 60:
-        gm.missile_list.append(Missile(game_sprite, x, y,
-                                       gm.MISSILE_MAX_VELO[gm.difficulty],
-                                       dx, dy, gm.PLAYER_DAMAGE[gm.difficulty]))
+        gm.missile_list.append(Missile(gm, x, y, dx, dy, enemy))
         enemy.shoot_counter = 0
 
 
@@ -352,6 +351,7 @@ class Missile(pygame.sprite.Sprite):
         self.sin = dy / gip
         self.x += round((self.rect.w + current_game_mode.player.rect.w) * self.cos / 2)
         self.y += round((self.rect.h + current_game_mode.player.rect.h) * self.sin / 2)
+        self.sender = entity
         self.set_coords()
 
     def move(self):
@@ -368,15 +368,17 @@ class Missile(pygame.sprite.Sprite):
         target_dict = pygame.sprite.spritecollide(self, enemy_sprite, False, False)
 
         for target in target_dict:
-            target.hp -= self.damage
-            self.destruct = True
+            if target != self.sender:
+                target.hp -= self.damage
+                self.destruct = True
 
         target_player = pygame.sprite.spritecollideany(self, player_sprite)
 
         if target_player is not None:
             # if self.rect.collidepoint((target_player.x, target_player.y)):
-            current_game_mode.player.hp -= self.damage
-            self.destruct = True
+            if target_player != self.sender:
+                current_game_mode.player.hp -= self.damage
+                self.destruct = True
 
         if abs(self.x - current_game_mode.player.x) > 1000:
             self.destruct = True
@@ -451,6 +453,7 @@ def start_screen(*args):
                           arrow,
                           lbl_start)
             pygame.mixer.music.stop()
+            current_game_mode.start()
             return
 
         menu_sprite.update(loc_pressed, arrow)
@@ -472,9 +475,9 @@ def change_gm():
 
 def change_df(btn):
     if current_game_mode.difficulty == 3:
-        current_game_mode.difficulty = 0
+        current_game_mode.set_difficulty(0)
     else:
-        current_game_mode.difficulty += 1
+        current_game_mode.set_difficulty(current_game_mode.difficulty + 1)
 
     btn.image = load_image("difficulty_" + str(current_game_mode.difficulty) + ".png")
 
@@ -904,11 +907,11 @@ while running:
     if current_game_mode.is_end():
         game_over_screen()
 
-    game_sprite.update()
+    current_game_mode.game_sprite.update()
     if not pygame.mixer.music.get_busy():
         pygame.mixer.music.load("data\Music\soundtrack_3.wav")
         pygame.mixer.music.play(-1, 0.0)
-    game_sprite.draw(screen)
+    current_game_mode.game_sprite.draw(screen)
 
     # game_arrow_sprite.update()
     # game_arrow_sprite.draw(screen)

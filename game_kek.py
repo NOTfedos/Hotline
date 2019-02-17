@@ -12,13 +12,13 @@ if __name__ == '__main__':
 
     current_game_mode = None
 
-    game_screens.start_screen(current_game_mode, screen)
+    game_screens.start_screen.run(current_game_mode, screen)
 
     while running:
         current_game_mode.parse_events(pygame.event.get())
         current_game_mode.update()
         if current_game_mode.is_end():
-            game_screens.game_over_screen(current_game_mode, screen)
+            game_screens.game_over_screen.run(current_game_mode, screen)
         current_game_mode.draw()
         pygame.display.flip()
 
